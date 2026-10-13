@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { enablePushNotifications } from '../services/pushNotifications'
+import { savePushSubscription } from '../services/pushSubscriptionStorage'
 
 export function PushNotificationSetup() {
   const [isEnabling, setIsEnabling] = useState(false)
@@ -13,8 +14,9 @@ export function PushNotificationSetup() {
     try {
       const token = await enablePushNotifications()
 
-      // Temporary development check. We'll save the token securely later.
-      console.info('NaPack FCM token registered:', token)
+      // Save the FCM token to Firestore for scheduled reminders.
+      await savePushSubscription(token)
+
       setIsEnabled(true)
       setStatus('Notifications are enabled for this browser.')
     } catch (error) {
@@ -33,6 +35,7 @@ export function PushNotificationSetup() {
   return (
     <section aria-labelledby="notification-setup-heading">
       <h2 id="notification-setup-heading">Travel reminders</h2>
+
       <p>
         Enable notifications so NaPack can remind you about your upcoming trip.
       </p>

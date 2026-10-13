@@ -1,5 +1,10 @@
+
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import {
+  getAuth,
+  signInAnonymously,
+  type User,
+} from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getMessaging, isSupported } from 'firebase/messaging'
 
@@ -15,6 +20,15 @@ const firebaseConfig = {
 export const firebaseApp = initializeApp(firebaseConfig)
 export const auth = getAuth(firebaseApp)
 export const db = getFirestore(firebaseApp)
+
+export async function ensureAnonymousUser(): Promise<User> {
+  if (auth.currentUser) {
+    return auth.currentUser
+  }
+
+  const credential = await signInAnonymously(auth)
+  return credential.user
+}
 
 export async function getFirebaseMessaging() {
   if (typeof window === 'undefined' || !(await isSupported())) {
