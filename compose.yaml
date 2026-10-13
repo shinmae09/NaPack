@@ -1,0 +1,42 @@
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - frontend_node_modules:/workspace/frontend/node_modules
+      - backend_node_modules:/workspace/backend/node_modules
+    command: sleep infinity
+
+  frontend:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    working_dir: /workspace/frontend
+    init: true
+    ports:
+    - "5173:5173"
+    - "4173:4173"
+    volumes:
+      - .:/workspace
+      - frontend_node_modules:/workspace/frontend/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+
+  backend:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    working_dir: /workspace/backend
+    init: true
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace
+      - backend_node_modules:/workspace/backend/node_modules
+    command: sh -c "npm install && npm run dev"
+
+volumes:
+  frontend_node_modules:
+  backend_node_modules:

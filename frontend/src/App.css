@@ -1,0 +1,103 @@
+main {
+  width: min(100% - 32px, 760px);
+  margin: 32px auto;
+}
+
+button {
+  cursor: pointer;
+  padding: 8px 12px;
+  margin: 4px 4px 4px 0;
+}
+
+input:not([type="checkbox"]) {
+  display: block;
+  width: 100%;
+  max-width: 360px;
+  padding: 8px;
+  margin: 6px 0 12px;
+}
+
+label {
+  display: block;
+}
+
+.category-card {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 20px 0;
+}
+
+.category-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.category-card__header h2 {
+  margin: 0;
+}
+
+.category-card__header p {
+  color: #4b5563;
+  margin: 8px 0;
+}
+
+.category-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: #39835b;
+  transition: width 150ms ease;
+}
+
+.packing-item-list {
+  list-style: none;
+  padding: 0;
+}
+
+.packing-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.packing-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-wrap: anywhere;
+}
+
+.packing-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.packing-item label:has(input:checked) span {
+  text-decoration: line-through;
+  color: #6b7280;
+}
+
+.packing-item form {
+  width: 100%;
+  padding: 12px 0;
+}
