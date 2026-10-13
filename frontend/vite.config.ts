@@ -12,6 +12,10 @@ export default defineConfig({
       filename: 'sw.ts',
       injectRegister: false,
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
       },

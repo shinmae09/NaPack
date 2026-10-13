@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
+import { PushNotificationSetup } from '../components/PushNotificationSetup'
 
 export function HomePage() {
   const navigate = useNavigate()
@@ -40,6 +41,8 @@ export function HomePage() {
           </ul>
         </section>
       )}
+
+      <PushNotificationSetup />
     </main>
   )
 }
