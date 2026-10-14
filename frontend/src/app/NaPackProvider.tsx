@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { createDefaultCategories } from '../features/packing/defaultCategories'
 import {
@@ -9,11 +10,30 @@ import {
   type UserProfile,
 } from '../features/packing/packingStorage'
 import type { PackingCategory } from '../features/packing/types'
+import { saveTripReminder } from '../services/tripReminderStorage'
 import { NaPackContext } from './NaPackContext'
 import type { CreateTripInput } from './NaPackContext'
 
 function createId(): string {
   return crypto.randomUUID()
+}
+
+/**
+ * Sync only reminder metadata to Firestore.
+ * Local trip operations should continue even if cloud sync fails.
+ */
+function syncTripReminder(trip: PackingTrip): void {
+  void saveTripReminder({
+    tripId: trip.id,
+    tripName: trip.tripName,
+    departureDate: trip.setup.departureDate,
+    status: trip.status,
+  }).catch((error: unknown) => {
+    console.error(
+      `Could not sync reminder metadata for trip ${trip.id}:`,
+      error,
+    )
+  })
 }
 
 export function NaPackProvider({ children }: { children: ReactNode }) {
@@ -36,6 +56,9 @@ export function NaPackProvider({ children }: { children: ReactNode }) {
           setUser(saved.user)
           setTrips(saved.trips)
           setActiveTripId(saved.activeTripId)
+
+          // Register existing trips for scheduled reminders.
+          saved.trips.forEach(syncTripReminder)
         }
       } catch (error) {
         console.error('Could not restore NaPack data:', error)
@@ -148,6 +171,9 @@ export function NaPackProvider({ children }: { children: ReactNode }) {
     setTrips((current) => [...current, newTrip])
     setActiveTripId(newTrip.id)
     setStorageError(null)
+
+    // Save only reminder metadata to Firestore.
+    syncTripReminder(newTrip)
   }
 
   function updateTripSetup(setup: TripSetup) {
@@ -160,6 +186,12 @@ export function NaPackProvider({ children }: { children: ReactNode }) {
           : trip,
       ),
     )
+
+    // Keep the cloud departure date in sync with local changes.
+    syncTripReminder({
+      ...activeTrip,
+      setup,
+    })
   }
 
   function setCategories(
@@ -186,19 +218,24 @@ export function NaPackProvider({ children }: { children: ReactNode }) {
   function completeTrip() {
     if (!activeTrip) return
 
+    const completedTrip: PackingTrip = {
+      ...activeTrip,
+      status: 'completed',
+      completedAt: new Date().toISOString(),
+    }
+
     setTrips((current) =>
       current.map((trip) =>
         trip.id === activeTrip.id
-          ? {
-              ...trip,
-              status: 'completed',
-              completedAt: new Date().toISOString(),
-            }
+          ? completedTrip
           : trip,
       ),
     )
 
     setActiveTripId(null)
+
+    // Retain the record but mark it completed so scheduled reminders skip it.
+    syncTripReminder(completedTrip)
   }
 
   return (

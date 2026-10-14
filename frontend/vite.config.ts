@@ -12,14 +12,19 @@ export default defineConfig({
       filename: 'sw.ts',
       injectRegister: false,
       registerType: 'autoUpdate',
+
+      // Test PWA behavior with the production build and preview.
+      // Avoid the development worker's incomplete precache manifest.
       devOptions: {
-        enabled: true,
-        type: 'module',
+        enabled: false,
       },
+
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
       },
+
       includeAssets: ['favicon.svg'],
+
       manifest: {
         name: 'NaPack - All Set, No Sweat!',
         short_name: 'NaPack',
@@ -45,6 +50,7 @@ export default defineConfig({
       },
     }),
   ],
+
   server: {
     host: '0.0.0.0',
     port: 5173,

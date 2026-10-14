@@ -5,7 +5,12 @@ import {
   getMessaging,
   onBackgroundMessage,
 } from 'firebase/messaging/sw'
-import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching'
+import {
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+  precacheAndRoute,
+} from 'workbox-precaching'
+import { NavigationRoute, registerRoute } from 'workbox-routing'
 
 declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: Array<{
@@ -14,9 +19,30 @@ declare const self: ServiceWorkerGlobalScope & {
   }>
 }
 
-precacheAndRoute(self.__WB_MANIFEST)
-cleanupOutdatedCaches()
+// Keep exactly ONE reference to self.__WB_MANIFEST.
+const precacheManifest = self.__WB_MANIFEST
 
+cleanupOutdatedCaches()
+precacheAndRoute(precacheManifest)
+
+// Find the app shell from the local manifest variable.
+// This avoids another literal reference to self.__WB_MANIFEST.
+const appShell = precacheManifest.find((entry) => {
+  const url = typeof entry === 'string' ? entry : entry.url
+  return new URL(url, self.location.origin).pathname === '/index.html'
+})
+
+if (appShell) {
+  const appShellUrl = typeof appShell === 'string' ? appShell : appShell.url
+
+  registerRoute(
+    new NavigationRoute(createHandlerBoundToURL(appShellUrl), {
+      denylist: [/^\/api(?:\/|$)/],
+    }),
+  )
+}
+
+// Firebase configuration.
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -29,6 +55,7 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig)
 const messaging = getMessaging(firebaseApp)
 
+// Handle Firebase messages when NaPack is in the background.
 onBackgroundMessage(messaging, (payload) => {
   const title = payload.data?.title ?? 'NaPack Reminder'
   const body =
@@ -45,25 +72,36 @@ onBackgroundMessage(messaging, (payload) => {
   })
 })
 
+// Open or focus NaPack when a notification is clicked.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
-  const url = new URL(
+  const targetUrl = new URL(
     String(event.notification.data?.url ?? '/'),
     self.location.origin,
-  ).href
+  )
+
+  // Only allow URLs belonging to the current app origin.
+  if (targetUrl.origin !== self.location.origin) {
+    return
+  }
 
   event.waitUntil(
-    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(
-      (clients) => {
-        const existingClient = clients.find((client) => client.url === url)
+    self.clients
+      .matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      })
+      .then((clients) => {
+        const existingClient = clients.find(
+          (client) => client.url === targetUrl.href,
+        )
 
-        if (existingClient && 'focus' in existingClient) {
+        if (existingClient) {
           return existingClient.focus()
         }
 
-        return self.clients.openWindow(url)
-      },
-    ),
+        return self.clients.openWindow(targetUrl.href)
+      }),
   )
 })

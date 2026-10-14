@@ -5,9 +5,26 @@ import { savePushSubscription } from '../services/pushSubscriptionStorage'
 export function PushNotificationSetup() {
   const [isEnabling, setIsEnabling] = useState(false)
   const [status, setStatus] = useState('')
-  const [isEnabled, setIsEnabled] = useState(false)
+  const [isEnabled, setIsEnabled] = useState(
+    () =>
+      typeof window !== 'undefined' &&
+      'Notification' in window &&
+      Notification.permission === 'granted',
+  )
 
   async function handleEnableNotifications() {
+    if (!('Notification' in window)) {
+      setStatus('Notifications are not supported by this browser.')
+      return
+    }
+
+    if (Notification.permission === 'denied') {
+      setStatus(
+        'Notifications are blocked. Allow them in your browser site settings, then reload NaPack.',
+      )
+      return
+    }
+
     setIsEnabling(true)
     setStatus('')
 
