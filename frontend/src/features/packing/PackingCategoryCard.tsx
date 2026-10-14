@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ProgressBar } from '../../components/ProgressBar'
 import { calculateCategoryProgress } from './packingProgress'
@@ -34,6 +34,44 @@ interface ItemFormProps {
 }
 
 type ItemFilter = 'all' | 'unpacked' | 'packed'
+type ItemSortOrder = 'default' | 'unpacked-first' | 'alphabetical'
+
+const VALID_SORT_ORDERS: ItemSortOrder[] = [
+  'default',
+  'unpacked-first',
+  'alphabetical',
+]
+
+function getSortPreferenceKey(categoryId: string): string {
+  return `napack:category-sort:v1:${categoryId}`
+}
+
+function getInitialSortOrder(categoryId: string): ItemSortOrder {
+  try {
+    const savedOrder = window.localStorage.getItem(
+      getSortPreferenceKey(categoryId),
+    )
+
+    if (
+      savedOrder &&
+      VALID_SORT_ORDERS.includes(savedOrder as ItemSortOrder)
+    ) {
+      return savedOrder as ItemSortOrder
+    }
+  } catch {
+    // Continue with the default order if local storage is unavailable.
+  }
+
+  return 'default'
+}
+
+interface ItemFormProps {
+  initialName?: string
+  initialQuantity?: number
+  submitLabel: string
+  onSubmit: (name: string, quantity?: number) => void
+  onCancel: () => void
+}
 
 function ItemForm({
   initialName = '',
@@ -137,18 +175,46 @@ export function PackingCategoryCard({
   const [renaming, setRenaming] = useState(false)
   const [categoryName, setCategoryName] = useState(category.name)
   const [itemFilter, setItemFilter] = useState<ItemFilter>('all')
+  const [sortOrder, setSortOrder] = useState<ItemSortOrder>(() =>
+    getInitialSortOrder(category.id),
+  )
   const [isExpanded, setIsExpanded] = useState(true)
 
   const progress = calculateCategoryProgress(category)
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
+  const sortPreferenceKey = getSortPreferenceKey(category.id)
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(sortPreferenceKey, sortOrder)
+    } catch {
+      // Sorting still works for this session if local storage is unavailable.
+    }
+  }, [sortPreferenceKey, sortOrder])
 
   const matchingItems = category.items.filter((item) =>
     item.name.toLocaleLowerCase().includes(normalizedQuery),
   )
 
-  const remainingItems = matchingItems.filter((item) => !item.isPacked)
+  const sortedMatchingItems = [...matchingItems].sort((a, b) => {
+    switch (sortOrder) {
+      case 'unpacked-first':
+        return Number(a.isPacked) - Number(b.isPacked)
 
-  const visibleItems = matchingItems.filter((item) => {
+      case 'alphabetical':
+        return a.name.localeCompare(b.name, undefined, {
+          sensitivity: 'base',
+        })
+
+      case 'default':
+      default:
+        return 0
+    }
+  })
+
+  const remainingItems = sortedMatchingItems.filter((item) => !item.isPacked)
+
+  const visibleItems = sortedMatchingItems.filter((item) => {
     if (itemFilter === 'unpacked') return !item.isPacked
     if (itemFilter === 'packed') return item.isPacked
     return true
@@ -176,9 +242,7 @@ export function PackingCategoryCard({
             aria-controls={`category-content-${category.id}`}
             onClick={() => setIsExpanded((expanded) => !expanded)}
           >
-            <span aria-hidden="true">
-              {isExpanded ? '▼' : '▶'}
-            </span>
+            <span aria-hidden="true">{isExpanded ? '▼' : '▶'}</span>
             <span>{category.name}</span>
           </button>
 
@@ -257,6 +321,22 @@ export function PackingCategoryCard({
         id={`category-content-${category.id}`}
         hidden={!isExpanded}
       >
+        <div className="packing-item-controls">
+          <label>
+            Sort items
+            <select
+              value={sortOrder}
+              onChange={(event) =>
+                setSortOrder(event.target.value as ItemSortOrder)
+              }
+            >
+              <option value="default">Default order</option>
+              <option value="unpacked-first">Unpacked first</option>
+              <option value="alphabetical">Alphabetical (A–Z)</option>
+            </select>
+          </label>
+        </div>
+
         <div
           className="packing-item-filters"
           role="group"
@@ -281,9 +361,7 @@ export function PackingCategoryCard({
           <button
             type="button"
             aria-pressed={itemFilter === 'packed'}
-            onClick={() =>
-              setItemFilter('packed')
-            }
+            onClick={() => setItemFilter('packed')}
           >
             Packed ({matchingItems.filter((item) => item.isPacked).length})
           </button>
@@ -377,10 +455,7 @@ export function PackingCategoryCard({
             onCancel={() => setAddingItem(false)}
           />
         ) : (
-          <button
-            type="button"
-            onClick={() => setAddingItem(true)}
-          >
+          <button type="button" onClick={() => setAddingItem(true)}>
             + Add item
           </button>
         )}

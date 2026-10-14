@@ -180,6 +180,26 @@ label {
   text-align: center;
 }
 
+.packing-item-controls {
+  margin: 12px 0;
+}
+
+.packing-item-controls label {
+  font-weight: 600;
+}
+
+.packing-item-controls select {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #111827;
+}
+
 .packing-item-filters {
   display: flex;
   flex-wrap: wrap;
