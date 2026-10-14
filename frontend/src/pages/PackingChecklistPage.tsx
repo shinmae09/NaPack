@@ -143,9 +143,7 @@ export function PackingChecklistPage() {
     updateCategory(categoryId, (category) => ({
       ...category,
       items: category.items.map((item) =>
-        item.id === itemId
-          ? { ...item, name, quantity }
-          : item,
+        item.id === itemId ? { ...item, name, quantity } : item,
       ),
     }))
   }
@@ -157,6 +155,15 @@ export function PackingChecklistPage() {
         item.id === itemId
           ? { ...item, isPacked: !item.isPacked }
           : item,
+      ),
+    }))
+  }
+
+  function handlePackAllItems(categoryId: string) {
+    updateCategory(categoryId, (category) => ({
+      ...category,
+      items: category.items.map((item) =>
+        item.isPacked ? item : { ...item, isPacked: true },
       ),
     }))
   }
@@ -174,25 +181,6 @@ export function PackingChecklistPage() {
     )
   }
 
-  function handleCompleteTrip() {
-    if (overallProgress < 100) {
-        const confirmed = window.confirm(
-        `Your packing progress is only ${overallProgress}%. Are you sure you want to mark "${tripName}" as complete? You can still complete the trip if some items are not packed.`,
-        )
-
-        if (!confirmed) return
-    } else {
-        const confirmed = window.confirm(
-        `Mark "${tripName}" as complete? Your checklist will be saved, and you can then create a new trip.`,
-        )
-
-        if (!confirmed) return
-    }
-
-    completeTrip()
-    navigate('/')
-    }
-
   const totalItems = categories.reduce(
     (total, category) => total + category.items.length,
     0,
@@ -204,8 +192,29 @@ export function PackingChecklistPage() {
     0,
   )
 
+  const remainingItems = totalItems - packedItems
+
   const overallProgress =
     totalItems === 0 ? 0 : Math.round((packedItems / totalItems) * 100)
+
+  function handleCompleteTrip() {
+    if (overallProgress < 100) {
+      const confirmed = window.confirm(
+        `Your packing progress is only ${overallProgress}%. Are you sure you want to mark "${tripName}" as complete? You can still complete the trip if some items are not packed.`,
+      )
+
+      if (!confirmed) return
+    } else {
+      const confirmed = window.confirm(
+        `Mark "${tripName}" as complete? Your checklist will be saved, and you can then create a new trip.`,
+      )
+
+      if (!confirmed) return
+    }
+
+    completeTrip()
+    navigate('/')
+  }
 
   return (
     <main>
@@ -215,9 +224,7 @@ export function PackingChecklistPage() {
 
       <h1>{tripName} Packing Checklist</h1>
 
-      <p>
-        Prepared for {setup.name}
-      </p>
+      <p>Prepared for {setup.name}</p>
 
       <p>
         Departure date:{' '}
@@ -226,15 +233,64 @@ export function PackingChecklistPage() {
         </time>
       </p>
 
-      {storageError && (
-        <p role="alert">{storageError}</p>
-      )}
+      {storageError && <p role="alert">{storageError}</p>}
 
-      <section aria-label="Overall packing progress">
-        <h2>Overall progress: {overallProgress}%</h2>
-        <p>
-          {packedItems} of {totalItems} items packed
-        </p>
+      <section
+        className="overall-progress"
+        aria-labelledby="overall-progress-heading"
+      >
+        <div className="overall-progress__header">
+          <div>
+            <h2 id="overall-progress-heading">Packing progress</h2>
+            <p className="overall-progress__status">
+              {totalItems === 0
+                ? 'Add items to start tracking your packing.'
+                : overallProgress === 100
+                  ? 'Everything is packed. You are ready to go!'
+                  : `${remainingItems} ${
+                      remainingItems === 1 ? 'item' : 'items'
+                    } left to pack`}
+            </p>
+          </div>
+
+          <span
+            className="overall-progress__percentage"
+            aria-label={`${overallProgress}% complete`}
+          >
+            {overallProgress}%
+          </span>
+        </div>
+
+        <div
+          className="overall-progress__track"
+          role="progressbar"
+          aria-label="Overall packing progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={overallProgress}
+          aria-valuetext={
+            totalItems === 0
+              ? 'No items added yet'
+              : `${packedItems} of ${totalItems} items packed`
+          }
+        >
+          <div
+            className="overall-progress__fill"
+            style={{ width: `${overallProgress}%` }}
+          />
+        </div>
+
+        <div className="overall-progress__counts">
+          <span>
+            <strong>{packedItems}</strong> packed
+          </span>
+          <span>
+            <strong>{remainingItems}</strong> remaining
+          </span>
+          <span>
+            <strong>{totalItems}</strong> total
+          </span>
+        </div>
       </section>
 
       <section aria-label="Packing categories">
@@ -244,6 +300,7 @@ export function PackingChecklistPage() {
             category={category}
             onAddItem={handleAddItem}
             onToggleItem={handleToggleItem}
+            onPackAllItems={handlePackAllItems}
             onEditItem={handleEditItem}
             onDeleteItem={handleDeleteItem}
             onRenameCategory={handleRenameCategory}
@@ -258,9 +315,7 @@ export function PackingChecklistPage() {
             New category name
             <input
               value={newCategoryName}
-              onChange={(event) =>
-                setNewCategoryName(event.target.value)
-              }
+              onChange={(event) => setNewCategoryName(event.target.value)}
               maxLength={60}
               required
             />
