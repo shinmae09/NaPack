@@ -29,6 +29,51 @@ interface BulkPackUndoAction {
 
 type UndoAction = ToggleUndoAction | BulkPackUndoAction
 
+
+function UndoIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 7v6h6" />
+      <path d="M5.2 12a8 8 0 1 0 2.1-5.4L3 13" />
+    </svg>
+  )
+}
+
+function CancelIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+}
+
+
+function PlusIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
+
 function createId(): string {
   return crypto.randomUUID()
 }
@@ -58,6 +103,16 @@ export function PackingChecklistPage() {
   const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [newlyCreatedCategoryId, setNewlyCreatedCategoryId] = useState<string | null>(null)
+  const [isProgressCompact, setIsProgressCompact] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setIsProgressCompact(window.scrollY > 280)
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     if (!undoAction) return
@@ -128,15 +183,17 @@ export function PackingChecklistPage() {
       return
     }
 
+    const createdCategoryId = createId()
     setCategories((current) => [
       ...current,
       {
-        id: createId(),
+        id: createdCategoryId,
         name,
         isDefault: false,
         items: [],
       },
     ])
+    setNewlyCreatedCategoryId(createdCategoryId)
 
     setNewCategoryName('')
     setShowCategoryForm(false)
@@ -356,26 +413,48 @@ export function PackingChecklistPage() {
   }
 
   return (
-    <main>
-      <button type="button" onClick={() => navigate('/')}>
-        ← Home
-      </button>
+    <main className="app-page checklist-page">
+      <div className="page-brand-mark"><img src="/napack-icon-192x192.png" alt="" /><span className="page-brand-mark__name">NaPack</span></div>
+      <header className="checklist-trip-header">
+        <div className="checklist-trip-header__title-row">
+          <span className="checklist-trip-header__icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="6" width="18" height="15" rx="2" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 11h18M10 11v2h4v-2" />
+            </svg>
+          </span>
+          <h1 className="checklist-page__title">
+            <span className="checklist-page__trip-name">
+              {tripName ? tripName.charAt(0).toLocaleUpperCase() + tripName.slice(1) : tripName}
+            </span>
+            <span className="checklist-page__title-suffix">Packing Checklist</span>
+          </h1>
+        </div>
 
-      <h1>{tripName} Packing Checklist</h1>
-
-      <p>Prepared for {setup.name}</p>
-
-      <p>
-        Departure date:{' '}
-        <time dateTime={setup.departureDate}>
-          {formatDate(setup.departureDate)}
-        </time>
-      </p>
+        <div className="checklist-trip-header__details">
+          <div className="checklist-trip-header__detail">
+            <span className="checklist-trip-header__detail-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
+              </svg>
+            </span>
+            <span><span className="checklist-trip-header__label">Prepared for</span><strong>{setup.name}</strong></span>
+          </div>
+          <div className="checklist-trip-header__detail">
+            <span className="checklist-trip-header__detail-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" />
+              </svg>
+            </span>
+            <span><span className="checklist-trip-header__label">Departure date</span><strong><time dateTime={setup.departureDate}>{formatDate(setup.departureDate)}</time></strong></span>
+          </div>
+        </div>
+      </header>
 
       {storageError && <p role="alert">{storageError}</p>}
 
       <section
-        className="overall-progress"
+        className={`overall-progress${isProgressCompact ? ' overall-progress--compact' : ''}`}
         aria-labelledby="overall-progress-heading"
       >
         <div className="overall-progress__header">
@@ -442,8 +521,15 @@ export function PackingChecklistPage() {
               : `Packed ${undoAction.items.length} items in "${undoAction.categoryName}".`}
           </span>
 
-          <button type="button" onClick={handleUndoAction}>
-            Undo
+          <button
+            type="button"
+            className="undo-notice__button"
+            title="Undo last packing change"
+            aria-label="Undo last packing change"
+            onClick={handleUndoAction}
+          >
+            <UndoIcon />
+            <span>Undo</span>
           </button>
         </div>
       )}
@@ -492,10 +578,17 @@ export function PackingChecklistPage() {
           </p>
         ) : (
           (normalizedQuery ? matchingCategories : categories).map(
-            (category) => (
+            (category, index) => (
               <PackingCategoryCard
-                key={category.id}
+                key={`${category.id}-${showCategoryForm ? 'category-form' : newlyCreatedCategoryId ? `new-${newlyCreatedCategoryId}` : 'normal'}`}
                 category={category}
+                defaultExpanded={
+                  normalizedQuery.length > 0 ||
+                  (!showCategoryForm &&
+                    (newlyCreatedCategoryId
+                      ? category.id === newlyCreatedCategoryId
+                      : index === 0))
+                }
                 searchQuery={searchQuery}
                 onAddItem={handleAddItem}
                 onToggleItem={handleToggleItem}
@@ -511,9 +604,9 @@ export function PackingChecklistPage() {
       </section>
 
       {showCategoryForm ? (
-        <form onSubmit={handleAddCategory}>
+        <form className="packing-form packing-form--category-add" onSubmit={handleAddCategory}>
           <label>
-            New category name
+            Give this category a name
             <input
               value={newCategoryName}
               onChange={(event) => setNewCategoryName(event.target.value)}
@@ -522,29 +615,32 @@ export function PackingChecklistPage() {
             />
           </label>
 
-          <button type="submit">Create category</button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowCategoryForm(false)
-              setNewCategoryName('')
-            }}
-          >
-            Cancel
-          </button>
+          <div className="packing-form__actions">
+            <button type="submit" className="icon-button icon-button--primary" title="Create category" aria-label="Create category"><PlusIcon /></button>
+            <button type="button" className="icon-button" title="Cancel" aria-label="Cancel" onClick={() => { setShowCategoryForm(false); setNewCategoryName('') }}><CancelIcon /></button>
+          </div>
         </form>
       ) : (
         <button
           type="button"
-          onClick={() => setShowCategoryForm(true)}
+          className="icon-text-button add-category-button"
+          onClick={() => { setNewlyCreatedCategoryId(null); setShowCategoryForm(true) }}
         >
-          + Add category
+          <PlusIcon />
+          <span>Add category</span>
         </button>
       )}
 
-      <section aria-label="Complete trip" className="complete-trip">
-        <h2>Finished packing for this trip?</h2>
+      <section aria-label="Complete trip" className="complete-trip complete-trip--prominent">
+        <div className="complete-trip__heading">
+          <span className="complete-trip__icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8 12 2.5 2.5L16 9" />
+            </svg>
+          </span>
+          <h2>Finished packing for this trip?</h2>
+        </div>
         <p>
           Completing this trip saves its checklist and lets you create a
           separate checklist for your next trip.
@@ -558,6 +654,7 @@ export function PackingChecklistPage() {
           Mark Trip as Complete
         </button>
       </section>
+      <footer className="app-footer"><span className="app-footer__tagline">NaPack™ · All set. No sweat.</span><span className="app-footer__meta">© 2026 · v0.0.0</span></footer>
     </main>
   )
 }

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ProgressBar } from '../../components/ProgressBar'
@@ -6,6 +7,7 @@ import type { PackingCategory, PackingItem } from './types'
 
 interface PackingCategoryCardProps {
   category: PackingCategory
+  defaultExpanded: boolean
   searchQuery: string
   onAddItem: (
     categoryId: string,
@@ -25,12 +27,87 @@ interface PackingCategoryCardProps {
   onDeleteCategory: (categoryId: string) => void
 }
 
-interface ItemFormProps {
-  initialName?: string
-  initialQuantity?: number
-  submitLabel: string
-  onSubmit: (name: string, quantity?: number) => void
-  onCancel: () => void
+type ActionIconName =
+  | 'edit'
+  | 'delete'
+  | 'undo'
+  | 'pack'
+  | 'add'
+  | 'chevron'
+  | 'save'
+  | 'cancel'
+
+function ActionIcon({ name }: { name: ActionIconName }) {
+  const common = {
+    width: 18,
+    height: 18,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
+    'aria-hidden': true as const,
+    focusable: false as const,
+  }
+
+  switch (name) {
+    case 'edit':
+      return (
+        <svg {...common}>
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+        </svg>
+      )
+    case 'delete':
+      return (
+        <svg {...common}>
+          <path d="M3 6h18" />
+          <path d="M8 6V4h8v2" />
+          <path d="m19 6-1 14H6L5 6" />
+          <path d="M10 10v6M14 10v6" />
+        </svg>
+      )
+    case 'undo':
+      return (
+        <svg {...common}>
+          <path d="M3 7v6h6" />
+          <path d="M5.2 12a8 8 0 1 0 2.1-5.4L3 13" />
+        </svg>
+      )
+    case 'pack':
+      return (
+        <svg {...common}>
+          <path d="m8 12 3 3 5-6" />
+          <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+          <path d="M16 3h5v5" />
+        </svg>
+      )
+    case 'add':
+      return (
+        <svg {...common}>
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+      )
+    case 'chevron':
+      return (
+        <svg {...common}>
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      )
+    case 'save':
+      return (
+        <svg {...common}>
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      )
+    case 'cancel':
+      return (
+        <svg {...common}>
+          <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
+      )
+  }
 }
 
 type ItemFilter = 'all' | 'unpacked' | 'packed'
@@ -112,7 +189,11 @@ function ItemForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form
+      className="packing-form packing-form--item"
+      onSubmit={handleSubmit}
+      noValidate
+    >
       <label>
         Item name
         <input
@@ -150,17 +231,33 @@ function ItemForm({
         </p>
       )}
 
-      <button type="submit">{submitLabel}</button>
+      <div className="packing-form__actions">
+        <button
+          type="submit"
+          className="icon-button icon-button--primary"
+          title={submitLabel}
+          aria-label={submitLabel}
+        >
+          <ActionIcon name="save" />
+        </button>
 
-      <button type="button" onClick={onCancel}>
-        Cancel
-      </button>
+        <button
+          type="button"
+          className="icon-button"
+          title="Cancel"
+          aria-label="Cancel"
+          onClick={onCancel}
+        >
+          <ActionIcon name="cancel" />
+        </button>
+      </div>
     </form>
   )
 }
 
 export function PackingCategoryCard({
   category,
+  defaultExpanded,
   searchQuery,
   onAddItem,
   onToggleItem,
@@ -178,7 +275,7 @@ export function PackingCategoryCard({
   const [sortOrder, setSortOrder] = useState<ItemSortOrder>(() =>
     getInitialSortOrder(category.id),
   )
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   const progress = calculateCategoryProgress(category)
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
@@ -242,7 +339,9 @@ export function PackingCategoryCard({
             aria-controls={`category-content-${category.id}`}
             onClick={() => setIsExpanded((expanded) => !expanded)}
           >
-            <span aria-hidden="true">{isExpanded ? '▼' : '▶'}</span>
+            <span className="category-card__chevron" aria-hidden="true">
+              <ActionIcon name="chevron" />
+            </span>
             <span>{category.name}</span>
           </button>
 
@@ -257,18 +356,24 @@ export function PackingCategoryCard({
           <div className="category-card__actions">
             <button
               type="button"
+              className="icon-button"
+              title="Rename category"
+              aria-label={`Rename ${category.name} category`}
               onClick={() => {
                 setCategoryName(category.name)
                 setRenaming(true)
                 setIsExpanded(true)
               }}
             >
-              Rename
+              <ActionIcon name="edit" />
             </button>
 
             {!category.isDefault && (
               <button
                 type="button"
+                className="icon-button icon-button--danger"
+                title="Delete category"
+                aria-label={`Delete ${category.name} category and its items`}
                 onClick={() => {
                   if (
                     window.confirm(
@@ -279,7 +384,7 @@ export function PackingCategoryCard({
                   }
                 }}
               >
-                Delete category
+                <ActionIcon name="delete" />
               </button>
             )}
           </div>
@@ -287,7 +392,10 @@ export function PackingCategoryCard({
       </header>
 
       {renaming && (
-        <form onSubmit={handleRename}>
+        <form
+          className="packing-form packing-form--category"
+          onSubmit={handleRename}
+        >
           <label>
             Category name
             <input
@@ -298,17 +406,29 @@ export function PackingCategoryCard({
             />
           </label>
 
-          <button type="submit">Save name</button>
+          <div className="packing-form__actions">
+            <button
+              type="submit"
+              className="icon-button icon-button--primary"
+              title="Save category name"
+              aria-label="Save category name"
+            >
+              <ActionIcon name="save" />
+            </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryName(category.name)
-              setRenaming(false)
-            }}
-          >
-            Cancel
-          </button>
+            <button
+              type="button"
+              className="icon-button"
+              title="Cancel"
+              aria-label="Cancel"
+              onClick={() => {
+                setCategoryName(category.name)
+                setRenaming(false)
+              }}
+            >
+              <ActionIcon name="cancel" />
+            </button>
+          </div>
         </form>
       )}
 
@@ -319,11 +439,13 @@ export function PackingCategoryCard({
 
       <div
         id={`category-content-${category.id}`}
-        hidden={!isExpanded}
+        className={`category-card__content${isExpanded ? ' category-card__content--expanded' : ''}`}
+        aria-hidden={!isExpanded}
       >
+        <div className="category-card__content-inner">
         <div className="packing-item-controls">
-          <label>
-            Sort items
+          <label className="packing-item-controls__label">
+            <span>Sort items</span>
             <select
               value={sortOrder}
               onChange={(event) =>
@@ -331,8 +453,8 @@ export function PackingCategoryCard({
               }
             >
               <option value="default">Default order</option>
-              <option value="unpacked-first">Unpacked first</option>
-              <option value="alphabetical">Alphabetical (A–Z)</option>
+              <option value="unpacked-first">Unpacked</option>
+              <option value="alphabetical">Alphabetical</option>
             </select>
           </label>
         </div>
@@ -367,18 +489,43 @@ export function PackingCategoryCard({
           </button>
         </div>
 
-        {!normalizedQuery && remainingItems.length > 0 && (
+        {!normalizedQuery && category.items.length > 0 && (
           <button
             type="button"
+            className={`pack-all-button${remainingItems.length === 0 ? ' is-complete' : ''}`}
+            title={
+              remainingItems.length === 0
+                ? 'All items are packed'
+                : 'Pack all remaining items'
+            }
+            aria-label={
+              remainingItems.length === 0
+                ? `All items in ${category.name} are packed`
+                : `Pack all ${category.items.filter((item) => !item.isPacked).length} remaining items in ${category.name}`
+            }
+            aria-pressed={remainingItems.length === 0}
+            disabled={remainingItems.length === 0}
             onClick={() => onPackAllItems(category.id)}
           >
-            Pack all remaining items (
-            {category.items.filter((item) => !item.isPacked).length})
+            <span className="pack-all-button__checkbox" aria-hidden="true">
+              {remainingItems.length === 0 ? '✓' : ''}
+            </span>
+            <ActionIcon name="pack" />
+            <span className="pack-all-button__label">Pack All</span>
+            <span className="icon-text-button__count">
+              {category.items.filter((item) => !item.isPacked).length}
+            </span>
           </button>
         )}
 
         {visibleItems.length === 0 ? (
-          <p>
+          <p
+            className={`packing-empty-state${
+              !normalizedQuery && category.items.length === 0
+                ? ' packing-empty-state--no-items'
+                : ''
+            }`}
+          >
             {normalizedQuery
               ? itemFilter === 'packed'
                 ? 'No matching packed items.'
@@ -394,38 +541,46 @@ export function PackingCategoryCard({
         ) : (
           <ul className="packing-item-list">
             {visibleItems.map((item) => (
-              <li key={item.id} className="packing-item">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={item.isPacked}
-                    onChange={() => onToggleItem(category.id, item.id)}
-                  />
+              <li key={item.id} className="packing-item-wrap">
+                <div className="packing-item">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={item.isPacked}
+                      onChange={() => onToggleItem(category.id, item.id)}
+                    />
 
-                  <span>
-                    {item.name}
-                    {item.quantity !== undefined && ` (${item.quantity})`}
-                  </span>
-                </label>
+                    <span>
+                      {item.name}
+                      {item.quantity !== undefined && ` (${item.quantity})`}
+                    </span>
+                  </label>
 
-                <div className="packing-item__actions">
-                  <button
-                    type="button"
-                    onClick={() => setEditingItem(item)}
-                  >
-                    Edit
-                  </button>
+                  <div className="packing-item__actions">
+                    <button
+                      type="button"
+                      className="icon-button"
+                      title="Edit item"
+                      aria-label={`Edit ${item.name}`}
+                      onClick={() => setEditingItem(item)}
+                    >
+                      <ActionIcon name="edit" />
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (window.confirm(`Delete "${item.name}"?`)) {
-                        onDeleteItem(category.id, item.id)
-                      }
-                    }}
-                  >
-                    Delete
-                  </button>
+                    <button
+                      type="button"
+                      className="icon-button icon-button--danger"
+                      title="Delete item"
+                      aria-label={`Delete ${item.name}`}
+                      onClick={() => {
+                        if (window.confirm(`Delete "${item.name}"?`)) {
+                          onDeleteItem(category.id, item.id)
+                        }
+                      }}
+                    >
+                      <ActionIcon name="delete" />
+                    </button>
+                  </div>
                 </div>
 
                 {editingItem?.id === item.id && (
@@ -455,10 +610,16 @@ export function PackingCategoryCard({
             onCancel={() => setAddingItem(false)}
           />
         ) : (
-          <button type="button" onClick={() => setAddingItem(true)}>
-            + Add item
+          <button
+            type="button"
+            className="icon-text-button"
+            onClick={() => setAddingItem(true)}
+          >
+            <ActionIcon name="add" />
+            <span>Add item</span>
           </button>
         )}
+        </div>
       </div>
     </section>
   )
