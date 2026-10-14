@@ -959,3 +959,198 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
     margin-top: 6px;
   }
 }
+
+/* NaPack responsive regression guard — keep content columns from collapsing. */
+.category-card,
+.category-card__header,
+.category-card__heading,
+.category-card__toggle,
+.category-card__heading > *,
+.overall-progress,
+.overall-progress__header,
+.overall-progress__status,
+.overall-progress__counts {
+  min-width: 0;
+}
+
+.category-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.category-card__heading {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+}
+
+.category-card__toggle {
+  display: flex;
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  white-space: normal;
+}
+
+.category-card__toggle > span:last-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.category-card__actions {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.category-card__heading p,
+.category-card__header p,
+.overall-progress__status,
+.overall-progress__counts {
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.packing-item-controls__label {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 280px);
+  align-items: center;
+  justify-content: start;
+  gap: 12px;
+  width: 100%;
+}
+
+.packing-item-controls__label > span {
+  white-space: nowrap;
+}
+
+.packing-item-controls__label select {
+  width: 100%;
+  min-width: 0;
+  max-width: 280px;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .category-card__header {
+    gap: 8px;
+  }
+
+  .category-card__heading {
+    flex: 1 1 0;
+  }
+
+  .category-card__toggle {
+    flex: 1 1 auto;
+    width: 100%;
+    font-size: 1.1rem;
+  }
+
+  .category-card__actions {
+    flex: 0 0 auto;
+  }
+
+  .packing-item-controls__label {
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .packing-item-controls__label select {
+    max-width: 100%;
+    font-size: 0.875rem;
+    padding-inline: 10px;
+  }
+}
+
+
+/* Final mobile layout correction: use a two-column grid for category headers.
+   This prevents the title/progress column from shrinking to min-content width. */
+.category-card__header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: 12px;
+  row-gap: 6px;
+  width: 100%;
+}
+
+.category-card__heading {
+  grid-column: 1;
+  grid-row: 1;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.category-card__toggle {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  white-space: normal;
+  overflow: visible;
+}
+
+.category-card__toggle > span:last-child {
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.category-card__heading > p {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.category-card__actions {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: max-content;
+  max-width: 100%;
+  min-width: max-content;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .category-card__header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 8px;
+  }
+
+  .category-card__toggle {
+    font-size: 1.1rem;
+    gap: 8px;
+  }
+
+  .category-card__heading > p {
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .category-card__actions .icon-button {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+  }
+}
