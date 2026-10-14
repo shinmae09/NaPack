@@ -3,6 +3,22 @@ import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
 
+function BackIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+function ArrowRightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  )
+}
+
 export function SetupPage() {
   const navigate = useNavigate()
   const { user, createTrip, isLoading, storageError } = useNaPack()
@@ -12,7 +28,6 @@ export function SetupPage() {
   const [departureDate, setDepartureDate] = useState('')
   const [error, setError] = useState('')
 
-  // Get today's date in local time using YYYY-MM-DD format.
   const today = new Date()
   const minimumDate = [
     today.getFullYear(),
@@ -28,18 +43,17 @@ export function SetupPage() {
     const trimmedName = name.trim()
 
     if (!trimmedTripName) {
-      setError('Please enter a name for your trip.')
+      setError('Please give your trip a name.')
       return
     }
 
-    // Ask for a name only when no user profile exists yet.
     if (!user && !trimmedName) {
       setError('Please enter your name.')
       return
     }
 
     if (!departureDate) {
-      setError('Please select your departure date.')
+      setError('Please choose your departure date.')
       return
     }
 
@@ -54,11 +68,9 @@ export function SetupPage() {
         ...(!user && { name: trimmedName }),
         departureDate,
       })
-
       navigate('/packing')
     } catch (submitError) {
       console.error('Could not create trip:', submitError)
-
       setError(
         submitError instanceof Error
           ? submitError.message
@@ -69,59 +81,69 @@ export function SetupPage() {
 
   if (isLoading) {
     return (
-      <main>
-        <h1>Loading your saved trips...</h1>
-        <p>Please wait before creating a new trip.</p>
+      <main className="app-page setup-page">
+        <div className="loading-state" role="status">
+          <span className="loading-state__mark" aria-hidden="true">N</span>
+          <h1>Getting things ready…</h1>
+          <p>Restoring your saved trips.</p>
+        </div>
       </main>
     )
   }
 
   return (
-    <main>
+    <main className="app-page setup-page">
       <button
+        className="back-action"
         type="button"
         onClick={() => navigate('/')}
         disabled={Boolean(storageError)}
       >
-        ← Back
+        <BackIcon />
+        <span>Back</span>
       </button>
 
-      <h1>Plan your next trip</h1>
+      <header className="setup-intro">
+        <span className="setup-intro__step">LET'S GET YOU READY</span>
+        <h1>Where are you headed?</h1>
+        <p>A few details now, and your packing checklist is ready to go.</p>
+        {user && <p className="setup-intro__welcome">Welcome back, {user.name}.</p>}
+      </header>
 
-      <p>Tell us about your trip so we can prepare your checklist.</p>
+      {storageError && (
+        <p className="form-message form-message--error" role="alert">
+          {storageError}
+        </p>
+      )}
 
-      {user && <p>Welcome back, {user.name}!</p>}
-
-      {storageError && <p role="alert">{storageError}</p>}
-
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="tripName">What is your trip called?</label>
-
+      <form className="trip-setup-form" onSubmit={handleSubmit}>
+        <div className="trip-setup-form__field">
+          <label htmlFor="tripName">Name your trip</label>
           <input
             id="tripName"
             name="tripName"
             type="text"
             value={tripName}
             onChange={(event) => setTripName(event.target.value)}
-            placeholder="e.g. Japan Trip"
+            placeholder="e.g. Japan adventure"
             maxLength={80}
+            autoComplete="off"
             required
             disabled={Boolean(storageError)}
           />
+          <p className="field-hint">Something you'll recognize later.</p>
         </div>
 
         {!user && (
-          <div>
+          <div className="trip-setup-form__field">
             <label htmlFor="name">What should we call you?</label>
-
             <input
               id="name"
               name="name"
               type="text"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="Enter your name"
+              placeholder="Your name"
               maxLength={60}
               autoComplete="given-name"
               required
@@ -130,9 +152,8 @@ export function SetupPage() {
           </div>
         )}
 
-        <div>
-          <label htmlFor="departureDate">When are you leaving?</label>
-
+        <div className="trip-setup-form__field">
+          <label htmlFor="departureDate">When do you leave?</label>
           <input
             id="departureDate"
             name="departureDate"
@@ -145,11 +166,17 @@ export function SetupPage() {
           />
         </div>
 
-        {error && <p role="alert">{error}</p>}
+        {error && (
+          <p className="form-message form-message--error" role="alert">
+            {error}
+          </p>
+        )}
 
-        <button type="submit" disabled={Boolean(storageError)}>
-          Create Trip
+        <button className="primary-action trip-setup-form__submit" type="submit" disabled={Boolean(storageError)}>
+          <span>Build my checklist</span>
+          <ArrowRightIcon />
         </button>
+        <p className="trip-setup-form__footnote">You can change your checklist anytime.</p>
       </form>
     </main>
   )
