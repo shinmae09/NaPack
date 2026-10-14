@@ -1,0 +1,97 @@
+name: Test NaPack Push Notification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  send-test-notification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Firebase Admin SDK
+        run: npm install --no-save firebase-admin
+
+      - name: Send test push notification
+        env:
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {
+            initializeApp,
+            cert,
+          } from 'firebase-admin/app'
+          import {
+            getFirestore,
+          } from 'firebase-admin/firestore'
+          import {
+            getMessaging,
+          } from 'firebase-admin/messaging'
+
+          const rawCredentials = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+
+          if (!rawCredentials) {
+            throw new Error('Missing FIREBASE_SERVICE_ACCOUNT_JSON secret.')
+          }
+
+          const credentials = JSON.parse(rawCredentials)
+
+          initializeApp({
+            credential: cert(credentials),
+            projectId: credentials.project_id,
+          })
+
+          const db = getFirestore()
+          const messaging = getMessaging()
+
+          const subscriptions = await db
+            .collectionGroup('pushSubscriptions')
+            .where('enabled', '==', true)
+            .get()
+
+          const tokens = subscriptions.docs
+            .map((document) => document.data().token)
+            .filter((token) => typeof token === 'string' && token.length > 0)
+
+          if (tokens.length === 0) {
+            throw new Error('No enabled push subscriptions were found.')
+          }
+
+          let sent = 0
+          let failed = 0
+
+          for (const token of tokens) {
+            try {
+              await messaging.send({
+                token,
+                data: {
+                  title: 'NaPack Test Notification',
+                  body: 'Your push notification setup is working!',
+                  url: '/',
+                },
+              })
+
+              sent += 1
+            } catch (error) {
+              failed += 1
+              console.error(
+                'Could not send to one subscription:',
+                error instanceof Error ? error.message : 'Unknown error',
+              )
+            }
+          }
+
+          console.log(`Test notifications sent: ${sent}`)
+          console.log(`Failed deliveries: ${failed}`)
+
+          if (sent === 0) {
+            throw new Error('No test notifications were accepted by FCM.')
+          }
+          NODE
