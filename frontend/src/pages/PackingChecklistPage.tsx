@@ -5,12 +5,29 @@ import { useNaPack } from '../app/useNaPack'
 import { PackingCategoryCard } from '../features/packing/PackingCategoryCard'
 import type { PackingCategory } from '../features/packing/types'
 
-interface UndoToggleAction {
+interface ToggleUndoAction {
+  type: 'toggle'
   categoryId: string
   itemId: string
   itemName: string
   wasPacked: boolean
 }
+
+interface BulkPackUndoItem {
+  id: string
+  name: string
+  quantity?: number
+  wasPacked: boolean
+}
+
+interface BulkPackUndoAction {
+  type: 'bulk'
+  categoryId: string
+  categoryName: string
+  items: BulkPackUndoItem[]
+}
+
+type UndoAction = ToggleUndoAction | BulkPackUndoAction
 
 function createId(): string {
   return crypto.randomUUID()
@@ -39,7 +56,7 @@ export function PackingChecklistPage() {
 
   const [newCategoryName, setNewCategoryName] = useState('')
   const [showCategoryForm, setShowCategoryForm] = useState(false)
-  const [undoAction, setUndoAction] = useState<UndoToggleAction | null>(null)
+  const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
@@ -183,6 +200,7 @@ export function PackingChecklistPage() {
     if (!item) return
 
     setUndoAction({
+      type: 'toggle',
       categoryId,
       itemId,
       itemName: item.name,
@@ -199,30 +217,76 @@ export function PackingChecklistPage() {
     }))
   }
 
-  function handleUndoToggle() {
+  function handlePackAllItems(categoryId: string) {
+    const category = categories.find(
+      (entry) => entry.id === categoryId,
+    )
+
+    if (!category) return
+
+    const itemsToPack = category.items.filter((item) => !item.isPacked)
+
+    if (itemsToPack.length === 0) return
+
+    setUndoAction({
+      type: 'bulk',
+      categoryId,
+      categoryName: category.name,
+      items: itemsToPack.map((item) => ({
+        id: item.id,
+        name: item.name,
+        quantity: item.quantity,
+        wasPacked: item.isPacked,
+      })),
+    })
+
+    updateCategory(categoryId, (currentCategory) => ({
+      ...currentCategory,
+      items: currentCategory.items.map((item) =>
+        item.isPacked ? item : { ...item, isPacked: true },
+      ),
+    }))
+  }
+
+  function handleUndoAction() {
     if (!undoAction) return
 
     const actionToUndo = undoAction
 
-    updateCategory(actionToUndo.categoryId, (category) => ({
-      ...category,
-      items: category.items.map((item) =>
-        item.id === actionToUndo.itemId
-          ? { ...item, isPacked: actionToUndo.wasPacked }
-          : item,
-      ),
-    }))
+    if (actionToUndo.type === 'toggle') {
+      updateCategory(actionToUndo.categoryId, (category) => ({
+        ...category,
+        items: category.items.map((item) =>
+          item.id === actionToUndo.itemId
+            ? { ...item, isPacked: actionToUndo.wasPacked }
+            : item,
+        ),
+      }))
+    } else {
+      const snapshotsById = new Map(
+        actionToUndo.items.map((item) => [item.id, item]),
+      )
+
+      updateCategory(actionToUndo.categoryId, (category) => ({
+        ...category,
+        items: category.items.map((item) => {
+          const snapshot = snapshotsById.get(item.id)
+
+          if (!snapshot) return item
+
+          const unchangedSinceBulkPack =
+            item.name === snapshot.name &&
+            item.quantity === snapshot.quantity &&
+            item.isPacked === true
+
+          if (!unchangedSinceBulkPack) return item
+
+          return { ...item, isPacked: snapshot.wasPacked }
+        }),
+      }))
+    }
 
     setUndoAction(null)
-  }
-
-  function handlePackAllItems(categoryId: string) {
-    updateCategory(categoryId, (category) => ({
-      ...category,
-      items: category.items.map((item) =>
-        item.isPacked ? item : { ...item, isPacked: true },
-      ),
-    }))
   }
 
   function handleDeleteItem(categoryId: string, itemId: string) {
@@ -231,11 +295,19 @@ export function PackingChecklistPage() {
       items: category.items.filter((item) => item.id !== itemId),
     }))
 
-    setUndoAction((current) =>
-      current?.categoryId === categoryId && current.itemId === itemId
-        ? null
-        : current,
-    )
+    setUndoAction((current) => {
+      if (!current) return null
+
+      if (
+        current.type === 'toggle' &&
+        current.categoryId === categoryId &&
+        current.itemId === itemId
+      ) {
+        return null
+      }
+
+      return current
+    })
   }
 
   function handleDeleteCategory(categoryId: string) {
@@ -363,12 +435,14 @@ export function PackingChecklistPage() {
       {undoAction && (
         <div className="undo-notice" role="status" aria-live="polite">
           <span>
-            {undoAction.wasPacked
-              ? `"${undoAction.itemName}" marked as unpacked.`
-              : `"${undoAction.itemName}" marked as packed.`}
+            {undoAction.type === 'toggle'
+              ? undoAction.wasPacked
+                ? `"${undoAction.itemName}" marked as unpacked.`
+                : `"${undoAction.itemName}" marked as packed.`
+              : `Packed ${undoAction.items.length} items in "${undoAction.categoryName}".`}
           </span>
 
-          <button type="button" onClick={handleUndoToggle}>
+          <button type="button" onClick={handleUndoAction}>
             Undo
           </button>
         </div>
