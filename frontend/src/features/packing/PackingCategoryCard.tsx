@@ -6,6 +6,7 @@ import type { PackingCategory, PackingItem } from './types'
 
 interface PackingCategoryCardProps {
   category: PackingCategory
+  defaultExpanded: boolean
   searchQuery: string
   onAddItem: (
     categoryId: string,
@@ -204,6 +205,7 @@ function ItemForm({
 
 export function PackingCategoryCard({
   category,
+  defaultExpanded,
   searchQuery,
   onAddItem,
   onToggleItem,
@@ -221,7 +223,7 @@ export function PackingCategoryCard({
   const [sortOrder, setSortOrder] = useState<ItemSortOrder>(() =>
     getInitialSortOrder(category.id),
   )
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   const progress = calculateCategoryProgress(category)
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
@@ -422,16 +424,25 @@ export function PackingCategoryCard({
           </button>
         </div>
 
-        {!normalizedQuery && remainingItems.length > 0 && (
+        {!normalizedQuery && category.items.length > 0 && (
           <button
             type="button"
-            className="icon-text-button pack-all-button"
-            title="Pack all remaining items"
-            aria-label={`Pack all ${category.items.filter((item) => !item.isPacked).length} remaining items in ${category.name}`}
+            className={`pack-all-button${remainingItems.length === 0 ? ' is-complete' : ''}`}
+            title={remainingItems.length === 0 ? 'All items are packed' : 'Pack all remaining items'}
+            aria-label={
+              remainingItems.length === 0
+                ? `All items in ${category.name} are packed`
+                : `Pack all ${category.items.filter((item) => !item.isPacked).length} remaining items in ${category.name}`
+            }
+            aria-pressed={remainingItems.length === 0}
+            disabled={remainingItems.length === 0}
             onClick={() => onPackAllItems(category.id)}
           >
+            <span className="pack-all-button__checkbox" aria-hidden="true">
+              {remainingItems.length === 0 ? '✓' : ''}
+            </span>
             <ActionIcon name="pack" />
-            <span>Pack all</span>
+            <span className="pack-all-button__label">Pack All</span>
             <span className="icon-text-button__count">
               {category.items.filter((item) => !item.isPacked).length}
             </span>

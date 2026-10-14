@@ -8,6 +8,8 @@ import {
   setPushSubscriptionEnabled,
 } from '../services/pushSubscriptionStorage'
 
+const NOTIFICATIONS_DISABLED_KEY = 'napack:notifications-disabled:v1'
+
 function BellIcon({ enabled }: { enabled: boolean }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -30,10 +32,22 @@ function BellIcon({ enabled }: { enabled: boolean }) {
 export function PushNotificationSetup() {
   const [isEnabling, setIsEnabling] = useState(false)
   const [isEnabled, setIsEnabled] = useState(false)
+  const [isOptedOut, setIsOptedOut] = useState(() => {
+    try {
+      return window.localStorage.getItem(NOTIFICATIONS_DISABLED_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
   const [status, setStatus] = useState('')
   const [showHint, setShowHint] = useState(false)
 
   const synchronizeSubscription = useCallback(async () => {
+    if (isOptedOut) {
+      setIsEnabled(false)
+      return
+    }
+
     if (!('Notification' in window)) {
       setIsEnabled(false)
       setStatus('Notifications are not supported by this browser.')
@@ -70,18 +84,23 @@ export function PushNotificationSetup() {
       setIsEnabled(false)
       setStatus('Could not verify notification setup. Check your connection and retry.')
     }
-  }, [])
+  }, [isOptedOut])
 
   useEffect(() => {
     let cancelled = false
-    const showTimer = window.setTimeout(() => {
-      if (!cancelled && !isEnabled) {
-        setShowHint(true)
-        window.setTimeout(() => {
-          if (!cancelled) setShowHint(false)
+    let hideTimer: number | undefined
+    const isMobile = window.matchMedia('(max-width: 480px)').matches
+
+    const showTimer = isMobile
+      ? window.setTimeout(() => {
+          if (!cancelled && !isEnabled && !isOptedOut) {
+            setShowHint(true)
+            hideTimer = window.setTimeout(() => {
+              if (!cancelled) setShowHint(false)
+            }, 5000)
+          }
         }, 5000)
-      }
-    }, 5000)
+      : undefined
 
     const synchronize = () => {
       if (!cancelled) void synchronizeSubscription()
@@ -91,16 +110,29 @@ export function PushNotificationSetup() {
 
     return () => {
       cancelled = true
-      window.clearTimeout(showTimer)
+      if (showTimer !== undefined) window.clearTimeout(showTimer)
+      if (hideTimer !== undefined) window.clearTimeout(hideTimer)
       window.removeEventListener('focus', synchronize)
     }
-  }, [isEnabled, synchronizeSubscription])
+  }, [isEnabled, isOptedOut, synchronizeSubscription])
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        NOTIFICATIONS_DISABLED_KEY,
+        isOptedOut ? 'true' : 'false',
+      )
+    } catch {
+      // Notification preference still applies for this session.
+    }
+  }, [isOptedOut])
 
   async function handleEnableNotifications() {
     if (isEnabled || isEnabling) return
     setIsEnabling(true)
     setShowHint(false)
     setStatus('')
+    setIsOptedOut(false)
 
     try {
       const token = await enablePushNotifications()
@@ -120,21 +152,40 @@ export function PushNotificationSetup() {
     }
   }
 
+  async function handleToggleNotifications() {
+    if (isEnabling) return
+
+    if (isEnabled) {
+      setIsEnabling(true)
+      setStatus('')
+      try {
+        await setPushSubscriptionEnabled(false)
+        setIsEnabled(false)
+        setIsOptedOut(true)
+        setStatus('Travel reminders are turned off.')
+      } catch (error) {
+        console.error('Could not disable travel reminders:', error)
+        setStatus('Could not turn off travel reminders. Check your connection and retry.')
+      } finally {
+        setIsEnabling(false)
+      }
+      return
+    }
+
+    await handleEnableNotifications()
+  }
+
   return (
     <div className="notification-control">
       <button
         className={`notification-control__button${isEnabled ? ' is-enabled' : ''}`}
         type="button"
-        onClick={handleEnableNotifications}
-        disabled={isEnabling || isEnabled}
-        aria-label={
-          isEnabling
-            ? 'Enabling travel reminders'
-            : isEnabled
-              ? 'Travel reminders enabled'
-              : 'Enable travel reminders'
-        }
-        title={isEnabled ? 'Travel reminders enabled' : 'Enable travel reminders'}
+        onClick={handleToggleNotifications}
+        disabled={isEnabling}
+        role="switch"
+        aria-checked={isEnabled}
+        aria-label="Travel reminders"
+        title={isEnabled ? 'Turn off travel reminders' : 'Turn on travel reminders'}
       >
         <BellIcon enabled={isEnabled} />
         {isEnabled && <span className="notification-control__dot" aria-hidden="true" />}
@@ -144,14 +195,9 @@ export function PushNotificationSetup() {
         <div className="notification-control__tooltip" role="status">
           <strong>Travel reminders</strong>
           <span>Enable notifications so NaPack can remind you about your upcoming trip.</span>
-          <button
-            type="button"
-            className="notification-control__tooltip-action"
-            onClick={handleEnableNotifications}
-            disabled={isEnabling}
-          >
-            {isEnabling ? 'Enabling…' : 'Enable'}
-          </button>
+          <span className="notification-control__tooltip-note">
+            Tap the bell to turn reminders on.
+          </span>
         </div>
       )}
 

@@ -51,8 +51,9 @@ function UndoIcon() {
 }
 
 function CancelIcon() {
-  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
 }
+
 
 function PlusIcon() {
   return (
@@ -401,11 +402,10 @@ export function PackingChecklistPage() {
 
   return (
     <main>
-      <button type="button" onClick={() => navigate('/')}>
-        ← Home
-      </button>
-
-      <h1>{tripName} Packing Checklist</h1>
+      <h1 className="checklist-page__title">
+        <span className="checklist-page__trip-name">{tripName}</span>
+        <span className="checklist-page__title-suffix">Packing Checklist</span>
+      </h1>
 
       <p>Prepared for {setup.name}</p>
 
@@ -543,10 +543,11 @@ export function PackingChecklistPage() {
           </p>
         ) : (
           (normalizedQuery ? matchingCategories : categories).map(
-            (category) => (
+            (category, index) => (
               <PackingCategoryCard
                 key={category.id}
                 category={category}
+                defaultExpanded={normalizedQuery.length > 0 || index === 0}
                 searchQuery={searchQuery}
                 onAddItem={handleAddItem}
                 onToggleItem={handleToggleItem}
@@ -589,8 +590,16 @@ export function PackingChecklistPage() {
         </button>
       )}
 
-      <section aria-label="Complete trip" className="complete-trip">
-        <h2>Finished packing for this trip?</h2>
+      <section aria-label="Complete trip" className="complete-trip complete-trip--prominent">
+        <div className="complete-trip__heading">
+          <span className="complete-trip__icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8 12 2.5 2.5L16 9" />
+            </svg>
+          </span>
+          <h2>Finished packing for this trip?</h2>
+        </div>
         <p>
           Completing this trip saves its checklist and lets you create a
           separate checklist for your next trip.
