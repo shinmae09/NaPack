@@ -326,3 +326,53 @@ project network.
 -   Before deploying, configure production serving, HTTPS, environment
     variables, logging, error handling, and appropriate CORS/security
     policies.
+
+## Deploy NaPack for free with Firebase Hosting
+
+NaPack can be hosted as a static PWA on Firebase Hosting's Spark (no-cost) plan. The production frontend does not require the Express health-check backend. The scheduled trip reminders continue to run in GitHub Actions.
+
+### One-time Firebase setup
+
+1. In Firebase Console, select the existing project used by NaPack. Keep the project on the **Spark plan**; do not upgrade to Blaze or attach billing.
+2. In **Authentication → Sign-in method**, enable **Anonymous** sign-in.
+3. Ensure **Cloud Firestore** is created and **Cloud Messaging** is enabled for the project.
+4. In **Project settings → Cloud Messaging**, obtain the Web Push certificate key pair (VAPID public key). Use that public key for `VITE_FIREBASE_VAPID_KEY`.
+5. Review `firestore.rules`. These rules allow signed-in users to read and write only within their own `users/{uid}/...` path and deny all other client access.
+
+### GitHub repository secrets
+
+Add these under **Repository → Settings → Secrets and variables → Actions → New repository secret**:
+
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_VAPID_KEY`
+- `FIREBASE_SERVICE_ACCOUNT_JSON`
+
+The first seven values are the web app configuration from Firebase Console. `FIREBASE_SERVICE_ACCOUNT_JSON` must be the full JSON contents of a service-account key authorized to deploy Firebase Hosting/Firestore rules and to send FCM messages. Store it only in GitHub Secrets; never commit the JSON key file. Keep the project on Spark and do not enable paid services.
+
+### Deploy
+
+1. Commit and push the project to the repository's `main` branch.
+2. Open the repository's **Actions** tab and select **Deploy NaPack to Firebase Hosting**.
+3. Choose **Run workflow** if you want to deploy manually, then wait for the build and deploy jobs to finish.
+4. Open the `web.app` URL printed by Firebase CLI. Use HTTPS for push notifications.
+
+The workflow runs `npm ci` and `npm run build` before deployment. It deploys the hosting output and Firestore rules together. If the build fails, the workflow stops before deployment.
+
+### Test on a phone
+
+- Open the HTTPS `web.app` URL on the phone.
+- On iPhone/iPad, use iOS/iPadOS 16.4 or later and add NaPack to the Home Screen before enabling web push notifications.
+- Enable notifications from inside NaPack after installing/opening it as appropriate for the browser.
+- In GitHub Actions, run **Test NaPack Push Notification** manually to test FCM delivery.
+- The daily reminder workflow runs at 00:00 UTC (08:00 Philippines time). It sends reminders for active trips departing the following day.
+
+A successful GitHub Actions run means FCM accepted the message, not a guarantee that every device displayed it. Confirm delivery on the target phone. GitHub-hosted Actions has usage limits and scheduled workflows can be delayed; it is not a guaranteed real-time notification service.
+
+### Local environment
+
+Copy `frontend/.env.example` to `frontend/.env.local` and fill in the Firebase web-app values for local development. `.env.local` is intentionally excluded from the deployment package and should remain untracked.
