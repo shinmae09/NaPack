@@ -960,7 +960,7 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   }
 }
 
-/* NaPack responsive regression guard ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â keep content columns from collapsing. */
+/* NaPack responsive regression guard ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â keep content columns from collapsing. */
 .category-card,
 .category-card__header,
 .category-card__heading,
@@ -1612,6 +1612,7 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   position: relative;
   display: inline-flex;
   align-items: center;
+  z-index: 30;
 }
 
 .notification-control__button {
@@ -1667,7 +1668,7 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
 
 .notification-control__tooltip {
   position: absolute;
-  z-index: 20;
+  z-index: 1000;
   top: calc(100% + 10px);
   right: 0;
   display: flex;
@@ -1845,11 +1846,6 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   .complete-trip--prominent p { margin-top: 8px; }
   .complete-trip--prominent > button { width: 100%; }
 }
-@media (min-width: 481px) {
-  .notification-control__tooltip { display: none !important; }
-}
-
-
 /* Follow-up polish: readable category actions, stable sort alignment, and hierarchy. */
 .category-card__actions .icon-button {
   width: 42px;
@@ -2533,4 +2529,16 @@ form.packing-form--category-add,
 
 @media (prefers-reduced-motion: reduce) {
   .trip-history__item { transition: none; }
+}
+
+/* Bell tooltip visibility fix: keep the tooltip above nearby header content. */
+.brand-header,
+.brand-header__notifications {
+  overflow: visible;
+}
+.notification-control {
+  isolation: isolate;
+}
+.notification-control__tooltip {
+  pointer-events: none;
 }

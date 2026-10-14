@@ -41,6 +41,7 @@ export function PushNotificationSetup() {
   })
   const [status, setStatus] = useState('')
   const [showHint, setShowHint] = useState(false)
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false)
 
   const synchronizeSubscription = useCallback(async () => {
     if (isOptedOut) {
@@ -176,7 +177,17 @@ export function PushNotificationSetup() {
   }
 
   return (
-    <div className="notification-control">
+    <div
+      className="notification-control"
+      onMouseEnter={() => setIsTooltipOpen(true)}
+      onMouseLeave={() => setIsTooltipOpen(false)}
+      onFocusCapture={() => setIsTooltipOpen(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setIsTooltipOpen(false)
+        }
+      }}
+    >
       <button
         className={`notification-control__button${isEnabled ? ' is-enabled' : ''}`}
         type="button"
@@ -191,13 +202,19 @@ export function PushNotificationSetup() {
         {isEnabled && <span className="notification-control__dot" aria-hidden="true" />}
       </button>
 
-      {showHint && !isEnabled && (
-        <div className="notification-control__tooltip" role="status">
+      {(isTooltipOpen || (showHint && !isEnabled)) && (
+        <div className="notification-control__tooltip" role="tooltip">
           <strong>Travel reminders</strong>
-          <span>Enable notifications so NaPack can remind you about your upcoming trip.</span>
-          <span className="notification-control__tooltip-note">
-            Tap the bell to turn reminders on.
+          <span>
+            {isEnabled
+              ? 'NaPack can remind you about your upcoming trip.'
+              : 'Enable notifications so NaPack can remind you about your upcoming trip.'}
           </span>
+          {!isEnabled && (
+            <span className="notification-control__tooltip-note">
+              Tap the bell to turn reminders on.
+            </span>
+          )}
         </div>
       )}
 
