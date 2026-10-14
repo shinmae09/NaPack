@@ -82,25 +82,35 @@ export function SetupPage() {
   if (isLoading) {
     return (
       <main className="app-page setup-page">
+        <div className="page-brand-mark"><img src="/napack-icon-192x192.png" alt="" /><span className="page-brand-mark__name">NaPack</span></div>
         <div className="loading-state" role="status">
           <span className="loading-state__mark" aria-hidden="true">N</span>
           <h1>Getting things ready…</h1>
           <p>Restoring your saved trips.</p>
         </div>
+        <footer className="app-footer"><span className="app-footer__tagline">NaPack™ · All set. No sweat.</span><span className="app-footer__meta">© 2026 · v0.0.0</span></footer>
       </main>
     )
   }
 
   return (
     <main className="app-page setup-page">
-      <button
-        className="back-action"
-        type="button"
-        onClick={() => navigate('/')}
-        disabled={Boolean(storageError)}
-      >
-        <BackIcon />
-      </button>
+      <div className="setup-page__header">
+        <button
+          className="back-action setup-page__back"
+          type="button"
+          onClick={() => navigate('/')}
+          disabled={Boolean(storageError)}
+          aria-label="Back to home"
+          title="Back to home"
+        >
+          <BackIcon />
+        </button>
+        <div className="page-brand-mark">
+          <img src="/napack-icon-192x192.png" alt="" />
+          <span className="page-brand-mark__name">NaPack</span>
+        </div>
+      </div>
 
       <header className="setup-intro">
         <span className="setup-intro__step">LET'S GET YOU READY</span>
@@ -177,6 +187,7 @@ export function SetupPage() {
         </button>
         <p className="trip-setup-form__footnote">You can change your checklist anytime.</p>
       </form>
+      <footer className="app-footer"><span className="app-footer__tagline">NaPack™ · All set. No sweat.</span><span className="app-footer__meta">© 2026 · v0.0.0</span></footer>
     </main>
   )
 }

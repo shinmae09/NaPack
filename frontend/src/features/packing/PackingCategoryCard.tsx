@@ -519,7 +519,7 @@ export function PackingCategoryCard({
         )}
 
         {visibleItems.length === 0 ? (
-          <p>
+          <p className="packing-empty-state">
             {normalizedQuery
               ? itemFilter === 'packed'
                 ? 'No matching packed items.'

@@ -413,7 +413,8 @@ export function PackingChecklistPage() {
   }
 
   return (
-    <main>
+    <main className="app-page checklist-page">
+      <div className="page-brand-mark"><img src="/napack-icon-192x192.png" alt="" /><span className="page-brand-mark__name">NaPack</span></div>
       <header className="checklist-trip-header">
         <div className="checklist-trip-header__title-row">
           <span className="checklist-trip-header__icon" aria-hidden="true">
@@ -653,6 +654,7 @@ export function PackingChecklistPage() {
           Mark Trip as Complete
         </button>
       </section>
+      <footer className="app-footer"><span className="app-footer__tagline">NaPack™ · All set. No sweat.</span><span className="app-footer__meta">© 2026 · v0.0.0</span></footer>
     </main>
   )
 }

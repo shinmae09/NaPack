@@ -113,8 +113,8 @@ export function HomePage() {
       )}
 
       <footer className="app-footer">
-        <span>NaPack</span>
-        <span>All set. No sweat.</span>
+        <span className="app-footer__tagline">NaPack™ · All set. No sweat.</span>
+        <span className="app-footer__meta">© 2026 · v0.0.0</span>
       </footer>
     </main>
   )
