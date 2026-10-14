@@ -353,6 +353,11 @@ button.primary:hover:not(:disabled),
   text-align: center;
 }
 
+.checklist-search__term {
+  color: var(--color-brand-strong);
+  font-weight: 650;
+}
+
 .packing-item-controls {
   margin: 12px 0;
 }

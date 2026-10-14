@@ -573,7 +573,7 @@ export function PackingChecklistPage() {
       <section aria-label="Packing categories">
         {normalizedQuery && matchingCategories.length === 0 ? (
           <p className="checklist-search__empty">
-            No items match “{searchQuery.trim()}”. Try another search term.
+            No items match “<span className="checklist-search__term">{searchQuery.trim()}</span>”. Try another search term.
           </p>
         ) : (
           (normalizedQuery ? matchingCategories : categories).map(
