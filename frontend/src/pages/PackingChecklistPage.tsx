@@ -29,6 +29,50 @@ interface BulkPackUndoAction {
 
 type UndoAction = ToggleUndoAction | BulkPackUndoAction
 
+
+function UndoIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M3 7v6h6" />
+      <path d="M5.2 12a8 8 0 1 0 2.1-5.4L3 13" />
+    </svg>
+  )
+}
+
+function CancelIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+  )
+}
+
 function createId(): string {
   return crypto.randomUUID()
 }
@@ -442,8 +486,15 @@ export function PackingChecklistPage() {
               : `Packed ${undoAction.items.length} items in "${undoAction.categoryName}".`}
           </span>
 
-          <button type="button" onClick={handleUndoAction}>
-            Undo
+          <button
+            type="button"
+            className="undo-notice__button"
+            title="Undo last packing change"
+            aria-label="Undo last packing change"
+            onClick={handleUndoAction}
+          >
+            <UndoIcon />
+            <span>Undo</span>
           </button>
         </div>
       )}
@@ -511,9 +562,9 @@ export function PackingChecklistPage() {
       </section>
 
       {showCategoryForm ? (
-        <form onSubmit={handleAddCategory}>
+        <form className="packing-form packing-form--category-add" onSubmit={handleAddCategory}>
           <label>
-            New category name
+            Give this category a name
             <input
               value={newCategoryName}
               onChange={(event) => setNewCategoryName(event.target.value)}
@@ -522,24 +573,19 @@ export function PackingChecklistPage() {
             />
           </label>
 
-          <button type="submit">Create category</button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setShowCategoryForm(false)
-              setNewCategoryName('')
-            }}
-          >
-            Cancel
-          </button>
+          <div className="packing-form__actions">
+            <button type="submit" className="icon-button icon-button--primary" title="Create category" aria-label="Create category"><PlusIcon /></button>
+            <button type="button" className="icon-button" title="Cancel" aria-label="Cancel" onClick={() => { setShowCategoryForm(false); setNewCategoryName('') }}><CancelIcon /></button>
+          </div>
         </form>
       ) : (
         <button
           type="button"
+          className="icon-text-button add-category-button"
           onClick={() => setShowCategoryForm(true)}
         >
-          + Add category
+          <PlusIcon />
+          <span>Add category</span>
         </button>
       )}
 
