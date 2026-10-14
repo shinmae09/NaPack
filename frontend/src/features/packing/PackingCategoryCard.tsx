@@ -453,7 +453,7 @@ export function PackingCategoryCard({
               }
             >
               <option value="default">Default order</option>
-              <option value="unpacked-first">Unpacked first</option>
+              <option value="unpacked-first">Unpacked</option>
               <option value="alphabetical">Alphabetical</option>
             </select>
           </label>

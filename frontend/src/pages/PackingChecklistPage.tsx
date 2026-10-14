@@ -107,7 +107,7 @@ export function PackingChecklistPage() {
   const [isProgressCompact, setIsProgressCompact] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => setIsProgressCompact(window.scrollY > 180)
+    const handleScroll = () => setIsProgressCompact(window.scrollY > 280)
 
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -573,7 +573,7 @@ export function PackingChecklistPage() {
       <section aria-label="Packing categories">
         {normalizedQuery && matchingCategories.length === 0 ? (
           <p className="checklist-search__empty">
-            No items match “<span className="checklist-search__term">{searchQuery.trim()}</span>”. Try another search term.
+            No items match “{searchQuery.trim()}”. Try another search term.
           </p>
         ) : (
           (normalizedQuery ? matchingCategories : categories).map(
