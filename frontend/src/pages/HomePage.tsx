@@ -103,7 +103,7 @@ export function HomePage() {
                 </span>
 
                 <span className="trip-history__details">
-                  <strong>{trip.tripName}</strong>
+                  <strong title={trip.tripName}>{trip.tripName}</strong>
                   <span>{trip.setup.departureDate}</span>
                 </span>
               </li>

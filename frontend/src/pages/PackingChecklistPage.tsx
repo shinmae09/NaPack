@@ -103,6 +103,16 @@ export function PackingChecklistPage() {
   const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [undoAction, setUndoAction] = useState<UndoAction | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [newlyCreatedCategoryId, setNewlyCreatedCategoryId] = useState<string | null>(null)
+  const [isProgressCompact, setIsProgressCompact] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setIsProgressCompact(window.scrollY > 180)
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   useEffect(() => {
     if (!undoAction) return
@@ -173,15 +183,17 @@ export function PackingChecklistPage() {
       return
     }
 
+    const createdCategoryId = createId()
     setCategories((current) => [
       ...current,
       {
-        id: createId(),
+        id: createdCategoryId,
         name,
         isDefault: false,
         items: [],
       },
     ])
+    setNewlyCreatedCategoryId(createdCategoryId)
 
     setNewCategoryName('')
     setShowCategoryForm(false)
@@ -402,24 +414,46 @@ export function PackingChecklistPage() {
 
   return (
     <main>
-      <h1 className="checklist-page__title">
-        <span className="checklist-page__trip-name">{tripName}</span>
-        <span className="checklist-page__title-suffix">Packing Checklist</span>
-      </h1>
+      <header className="checklist-trip-header">
+        <div className="checklist-trip-header__title-row">
+          <span className="checklist-trip-header__icon" aria-hidden="true">
+            <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="6" width="18" height="15" rx="2" />
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 11h18M10 11v2h4v-2" />
+            </svg>
+          </span>
+          <h1 className="checklist-page__title">
+            <span className="checklist-page__trip-name">
+              {tripName ? tripName.charAt(0).toLocaleUpperCase() + tripName.slice(1) : tripName}
+            </span>
+            <span className="checklist-page__title-suffix">Packing Checklist</span>
+          </h1>
+        </div>
 
-      <p>Prepared for {setup.name}</p>
-
-      <p>
-        Departure date:{' '}
-        <time dateTime={setup.departureDate}>
-          {formatDate(setup.departureDate)}
-        </time>
-      </p>
+        <div className="checklist-trip-header__details">
+          <div className="checklist-trip-header__detail">
+            <span className="checklist-trip-header__detail-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
+              </svg>
+            </span>
+            <span><span className="checklist-trip-header__label">Prepared for</span><strong>{setup.name}</strong></span>
+          </div>
+          <div className="checklist-trip-header__detail">
+            <span className="checklist-trip-header__detail-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 10h18" />
+              </svg>
+            </span>
+            <span><span className="checklist-trip-header__label">Departure date</span><strong><time dateTime={setup.departureDate}>{formatDate(setup.departureDate)}</time></strong></span>
+          </div>
+        </div>
+      </header>
 
       {storageError && <p role="alert">{storageError}</p>}
 
       <section
-        className="overall-progress"
+        className={`overall-progress${isProgressCompact ? ' overall-progress--compact' : ''}`}
         aria-labelledby="overall-progress-heading"
       >
         <div className="overall-progress__header">
@@ -545,9 +579,15 @@ export function PackingChecklistPage() {
           (normalizedQuery ? matchingCategories : categories).map(
             (category, index) => (
               <PackingCategoryCard
-                key={category.id}
+                key={`${category.id}-${showCategoryForm ? 'category-form' : newlyCreatedCategoryId ? `new-${newlyCreatedCategoryId}` : 'normal'}`}
                 category={category}
-                defaultExpanded={normalizedQuery.length > 0 || index === 0}
+                defaultExpanded={
+                  normalizedQuery.length > 0 ||
+                  (!showCategoryForm &&
+                    (newlyCreatedCategoryId
+                      ? category.id === newlyCreatedCategoryId
+                      : index === 0))
+                }
                 searchQuery={searchQuery}
                 onAddItem={handleAddItem}
                 onToggleItem={handleToggleItem}
@@ -583,7 +623,7 @@ export function PackingChecklistPage() {
         <button
           type="button"
           className="icon-text-button add-category-button"
-          onClick={() => setShowCategoryForm(true)}
+          onClick={() => { setNewlyCreatedCategoryId(null); setShowCategoryForm(true) }}
         >
           <PlusIcon />
           <span>Add category</span>

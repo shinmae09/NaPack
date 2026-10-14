@@ -960,7 +960,7 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   }
 }
 
-/* NaPack responsive regression guard â€” keep content columns from collapsing. */
+/* NaPack responsive regression guard Ã¢â‚¬â€ keep content columns from collapsing. */
 .category-card,
 .category-card__header,
 .category-card__heading,
@@ -1944,5 +1944,490 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   }
   .checklist-page__title {
     font-size: clamp(1.65rem, 7vw, 2.1rem);
+  }
+}
+
+
+/* Sort label stays at the left edge; the dropdown stays on the right. */
+.packing-item-controls {
+  width: 100%;
+  display: flex;
+  justify-content: stretch;
+}
+.packing-item-controls__label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(140px, 220px);
+  align-items: center;
+  justify-content: stretch;
+  gap: 12px;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+.packing-item-controls__label > span {
+  justify-self: start;
+  text-align: left;
+}
+.packing-item-controls__label select {
+  justify-self: end;
+  width: 100%;
+  min-width: 0;
+  max-width: 220px;
+  margin: 0;
+}
+
+/* More polished trip overview: distinct title and compact metadata cards. */
+.checklist-trip-header {
+  margin: 8px 0 26px;
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid #e1ebf6;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #ffffff 0%, #f3f8ff 100%);
+  box-shadow: 0 8px 24px rgba(30, 64, 110, 0.055);
+}
+.checklist-trip-header__title-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.checklist-trip-header__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  border-radius: 15px;
+  color: var(--color-brand-strong);
+  background: #e3f1ff;
+}
+.checklist-trip-header .checklist-page__title {
+  min-width: 0;
+  margin: 0;
+}
+.checklist-trip-header__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 22px;
+}
+.checklist-trip-header__detail {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 190px;
+  padding: 12px 14px;
+  border: 1px solid #e4edf7;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+}
+.checklist-trip-header__detail-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border-radius: 10px;
+  background: #eef5fc;
+  color: #5c7695;
+}
+.checklist-trip-header__detail > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.checklist-trip-header__label {
+  color: #718198;
+  font-size: .78rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.checklist-trip-header__detail strong {
+  color: #243249;
+  font-size: .96rem;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .packing-item-controls__label {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 150px);
+    width: 100%;
+    gap: 8px;
+  }
+  .packing-item-controls__label select {
+    width: 100%;
+    max-width: 150px;
+    justify-self: end;
+  }
+  .checklist-trip-header {
+    padding: 16px;
+    border-radius: 18px;
+    margin-bottom: 22px;
+  }
+  .checklist-trip-header__title-row {
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .checklist-trip-header__icon {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+    border-radius: 12px;
+  }
+  .checklist-trip-header__icon svg {
+    width: 21px;
+    height: 21px;
+  }
+  .checklist-trip-header .checklist-page__title {
+    gap: .2em;
+  }
+  .checklist-trip-header__details {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .checklist-trip-header__detail {
+    min-width: 0;
+    padding: 10px 12px;
+  }
+}
+
+
+/* Keep category title and edit/delete actions on the same visual center line. */
+.category-card__header {
+  display: flex;
+  align-items: center;
+}
+.category-card__heading {
+  align-self: center;
+}
+.category-card__actions {
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.category-card__actions .icon-button {
+  align-self: center;
+}
+
+/* Requested checklist refinements: sticky compact progress, mobile search, icons, motion, and bell depth. */
+.overall-progress {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  transition: padding 220ms ease, margin 220ms ease, border-radius 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+  backdrop-filter: blur(12px);
+}
+.overall-progress--compact {
+  padding: 10px 16px;
+  margin: 8px 0 18px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 24px rgba(23, 32, 51, 0.14);
+}
+.overall-progress--compact .overall-progress__header {
+  align-items: center;
+  gap: 10px;
+}
+.overall-progress--compact .overall-progress__header h2 {
+  font-size: 0.92rem;
+}
+.overall-progress--compact .overall-progress__status {
+  display: none;
+}
+.overall-progress--compact .overall-progress__percentage {
+  font-size: 1.25rem;
+}
+.overall-progress--compact .overall-progress__track {
+  height: 6px;
+  margin: 8px 0;
+}
+.overall-progress--compact .overall-progress__counts {
+  gap: 4px 12px;
+  font-size: 0.78rem;
+}
+
+.checklist-trip-header__detail:first-child .checklist-trip-header__detail-icon {
+  color: #2878c8;
+  background: #e6f2ff;
+}
+.checklist-trip-header__detail:nth-child(2) .checklist-trip-header__detail-icon {
+  color: #16866d;
+  background: #e2f7ef;
+}
+
+.category-card__content {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: max-height 300ms ease, opacity 220ms ease, transform 260ms ease;
+  pointer-events: none;
+}
+.category-card__content--expanded {
+  max-height: 5000px;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.category-card__content[aria-hidden="true"] {
+  visibility: hidden;
+  transition: max-height 300ms ease, opacity 220ms ease, transform 260ms ease, visibility 0s linear 300ms;
+}
+.category-card__content[aria-hidden="false"] {
+  visibility: visible;
+  transition: max-height 300ms ease, opacity 220ms ease, transform 260ms ease, visibility 0s;
+}
+.category-card__chevron svg {
+  transition: transform 220ms ease;
+}
+.category-card__toggle[aria-expanded="true"] .category-card__chevron svg {
+  transform: rotate(180deg);
+}
+form.packing-form,
+form.packing-form--category-add,
+.packing-item-wrap > .packing-form {
+  animation: napack-panel-in 220ms ease-out both;
+  transform-origin: top center;
+}
+@keyframes napack-panel-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.notification-control__button {
+  box-shadow: 0 4px 10px rgba(23, 32, 51, 0.12), 0 1px 3px rgba(23, 32, 51, 0.08);
+  transition: box-shadow 180ms ease, transform 180ms ease, background-color 180ms ease;
+}
+.notification-control__button:hover:not(:disabled) {
+  box-shadow: 0 7px 16px rgba(23, 32, 51, 0.16), 0 2px 5px rgba(23, 32, 51, 0.09);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .checklist-search {
+    margin: 18px 0 22px;
+  }
+  .checklist-search input[type="search"] {
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+  }
+  .overall-progress {
+    top: 6px;
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .overall-progress--compact {
+    padding: 8px 12px;
+    margin: 6px 0 14px;
+  }
+  .overall-progress--compact .overall-progress__counts {
+    font-size: 0.72rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overall-progress,
+  .category-card__content,
+  .category-card__chevron svg,
+  .notification-control__button,
+  form.packing-form {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+
+/* Follow-up polish: stronger surface depth, full-width sticky progress, and route motion. */
+.route-transition {
+  animation: napack-route-enter 260ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  transform-origin: top center;
+}
+
+@keyframes napack-route-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Make existing elevation more visible without changing the page layout. */
+input:not([type="checkbox"]),
+textarea,
+select {
+  box-shadow: 0 2px 5px rgba(23, 32, 51, 0.055), 0 1px 2px rgba(23, 32, 51, 0.035);
+}
+
+form,
+.overall-progress,
+.home-hero,
+.notification-control__button,
+.primary-action,
+button.primary,
+.complete-trip button {
+  box-shadow: 0 8px 24px rgba(23, 32, 51, 0.085), 0 2px 6px rgba(23, 32, 51, 0.045);
+}
+
+/* Keep button shadows subtle enough that controls still feel clickable, not raised cards. */
+.primary-action,
+button.primary,
+.complete-trip button,
+.notification-control__button {
+  transition: box-shadow 200ms ease, transform 200ms ease, background-color 180ms ease;
+}
+
+/* The compact progress card must be opaque and span the viewport on mobile so
+   category headings never show through around its edges while scrolling. */
+@media (max-width: 600px) {
+  .overall-progress--compact {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-sizing: border-box;
+    width: 100vw;
+    max-width: 100vw;
+    margin-top: 0;
+    margin-left: calc((100% - 100vw) / 2);
+    padding: 9px 16px 10px;
+    border: 0;
+    border-bottom: 1px solid rgba(23, 32, 51, 0.08);
+    border-radius: 0 0 16px 16px;
+    background: #fff;
+    background-clip: padding-box;
+    box-shadow: 0 10px 26px rgba(23, 32, 51, 0.18), 0 3px 8px rgba(23, 32, 51, 0.08);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .overall-progress--compact .overall-progress__header,
+  .overall-progress--compact .overall-progress__track,
+  .overall-progress--compact .overall-progress__counts {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+/* Panels ease in from the top when opened. */
+form.packing-form,
+form.packing-form--category-add,
+.packing-item-wrap > .packing-form {
+  animation: napack-panel-in 260ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+  transform-origin: top center;
+  will-change: opacity, transform;
+}
+
+@keyframes napack-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition,
+  form.packing-form,
+  form.packing-form--category-add,
+  .packing-item-wrap > .packing-form {
+    animation: none !important;
+  }
+}
+
+
+/* Past adventures: keep the history list to roughly five rows, with older trips scrollable. */
+.trip-history {
+  max-height: 345px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.45) transparent;
+}
+
+.trip-history__item {
+  box-sizing: border-box;
+  min-height: 69px;
+}
+
+.trip-history__details strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Animate progress changes whenever item completion changes the percentage. */
+.overall-progress__fill,
+.progress-bar__fill {
+  transition: width 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: width;
+}
+
+/* Use a grid row transition for a more natural, content-sized category expansion. */
+.category-card__content {
+  display: grid;
+  grid-template-rows: 0fr;
+  max-height: none;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition:
+    grid-template-rows 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.category-card__content-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.category-card__content--expanded {
+  grid-template-rows: 1fr;
+  max-height: none;
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.category-card__content[aria-hidden="true"] {
+  visibility: hidden;
+  transition:
+    grid-template-rows 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 340ms;
+}
+
+.category-card__content[aria-hidden="false"] {
+  visibility: visible;
+  transition:
+    grid-template-rows 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 220ms ease,
+    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overall-progress__fill,
+  .progress-bar__fill,
+  .category-card__content {
+    transition: none !important;
+    will-change: auto;
   }
 }

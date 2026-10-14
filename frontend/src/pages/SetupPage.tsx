@@ -100,7 +100,6 @@ export function SetupPage() {
         disabled={Boolean(storageError)}
       >
         <BackIcon />
-        <span>Back</span>
       </button>
 
       <header className="setup-intro">
