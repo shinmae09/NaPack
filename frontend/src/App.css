@@ -960,7 +960,7 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   }
 }
 
-/* NaPack responsive regression guard ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â keep content columns from collapsing. */
+/* NaPack responsive regression guard ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â keep content columns from collapsing. */
 .category-card,
 .category-card__header,
 .category-card__heading,
@@ -1756,7 +1756,19 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   position: absolute; right: 5px; bottom: 5px; width: 8px; height: 8px;
   border: 2px solid white; border-radius: 50%; background: #168bfa;
 }
-.notification-control__tooltip-note { display: block; color: var(--color-muted); font-size: .82rem; }
+.notification-control__tooltip-note {
+  display: block;
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 7px 10px;
+  border-radius: 9px;
+  background: #eaf4ff;
+  color: #075eb8;
+  font-size: .82rem;
+  font-weight: 650;
+  line-height: 1.35;
+  box-shadow: inset 0 0 0 1px rgba(20, 115, 230, 0.10);
+}
 .notification-control__status {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
@@ -2631,6 +2643,12 @@ form.packing-form--category-add,
     font-size: 0.78rem;
   }
 
+  .notification-control__tooltip-note {
+    padding: 6px 8px;
+    font-size: 0.76rem;
+    font-weight: 650;
+  }
+
   .page-brand-mark img {
     width: 28px;
     height: 28px;
@@ -2919,5 +2937,161 @@ form.packing-form--category-add,
 
   .packing-item label > span {
     font-size: 0.86rem;
+  }
+}
+/* Floating, compact undo banner: stays visible regardless of scroll position. */
+.undo-notice {
+  position: fixed;
+  z-index: 1500;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  width: min(440px, calc(100% - 32px));
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 0;
+  border: 1px solid #cfe4d7;
+  border-radius: 14px;
+  background: #f3fbf6;
+  color: #24563b;
+  box-shadow: 0 8px 24px rgba(20, 35, 52, 0.2);
+  animation: undo-banner-enter 180ms ease-out both;
+}
+
+.undo-notice > span {
+  min-width: 0;
+  flex: 1 1 auto;
+  font-size: 0.875rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.undo-notice .undo-notice__button {
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.8125rem;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.undo-notice__button svg {
+  width: 16px;
+  height: 16px;
+}
+
+@keyframes undo-banner-enter {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-width: 600px) {
+  .undo-notice {
+    width: calc(100% - 24px);
+    max-width: 420px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    gap: 8px;
+    padding: 9px 10px;
+    border-radius: 12px;
+  }
+
+  .undo-notice > span {
+    font-size: 0.78rem;
+    line-height: 1.3;
+  }
+
+  .undo-notice .undo-notice__button {
+    min-height: 34px;
+    padding: 6px 9px;
+    font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 374px) {
+  .undo-notice {
+    width: calc(100% - 20px);
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .undo-notice > span { font-size: 0.74rem; }
+  .undo-notice .undo-notice__button { min-height: 32px; padding: 5px 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .undo-notice { animation: none; }
+}
+
+/* Mobile checklist refinement: tighter item rhythm and easier-to-tap actions. */
+@media (max-width: 600px) {
+  .packing-item-list {
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+
+  .packing-item {
+    min-height: 54px;
+    padding: 5px 0;
+    gap: 8px;
+  }
+
+  .packing-item label {
+    min-height: 42px;
+    gap: 9px;
+    padding: 2px 0;
+  }
+
+  .packing-item__actions {
+    flex: 0 0 auto;
+    gap: 6px;
+  }
+
+  /* Keep the circular buttons compact visually, but large enough to tap. */
+  .packing-item__actions .icon-button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 10px;
+    border-radius: 50%;
+  }
+
+  .packing-item__actions .icon-button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 374px) {
+  .packing-item {
+    min-height: 50px;
+    padding-block: 4px;
+  }
+
+  .packing-item label {
+    gap: 7px;
+  }
+
+  .packing-item__actions {
+    gap: 4px;
+  }
+
+  .packing-item__actions .icon-button {
+    width: 38px;
+    min-width: 38px;
+    height: 38px;
+    min-height: 38px;
+    padding: 9px;
   }
 }
