@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
 import { PushNotificationSetup } from '../components/PushNotificationSetup'
@@ -37,7 +38,12 @@ export function HomePage() {
           width="48"
           height="48"
         />
+
         <span className="brand-header__name">NaPack</span>
+
+        <div className="brand-header__notifications">
+          <PushNotificationSetup />
+        </div>
       </header>
 
       <section className="home-hero" aria-labelledby="home-title">
@@ -45,37 +51,57 @@ export function HomePage() {
           <PlaneIcon />
           <span>TRAVEL LIGHT. FEEL READY.</span>
         </div>
-        <h1 id="home-title">Your next trip, <span>all packed.</span></h1>
+
+        <h1 id="home-title">
+          Your next trip, <span>all packed.</span>
+        </h1>
+
         <p className="home-hero__description">
           A simple checklist for the things you need, so you can focus on the
           moments ahead.
         </p>
+
         <button
           className="primary-action home-hero__action"
           type="button"
           onClick={() => navigate('/setup')}
         >
-          <span>{completedTrips.length > 0 ? 'Plan another trip' : 'Plan your trip'}</span>
+          <span>
+            {completedTrips.length > 0
+              ? 'Plan another trip'
+              : 'Plan your trip'}
+          </span>
           <ArrowRightIcon />
         </button>
-        <p className="home-hero__note">Your checklist stays saved on this device.</p>
+
+        <p className="home-hero__note">
+          Your checklist stays saved on this device.
+        </p>
       </section>
 
       {completedTrips.length > 0 && (
-        <section className="home-section" aria-labelledby="completed-trips-title">
+        <section
+          className="home-section"
+          aria-labelledby="completed-trips-title"
+        >
           <div className="home-section__heading">
             <div>
               <h2 id="completed-trips-title">Past adventures</h2>
               <p>Your completed trips</p>
             </div>
-            <span className="home-section__count">{completedTrips.length}</span>
+
+            <span className="home-section__count">
+              {completedTrips.length}
+            </span>
           </div>
+
           <ul className="trip-history">
             {completedTrips.map((trip) => (
               <li className="trip-history__item" key={trip.id}>
                 <span className="trip-history__icon" aria-hidden="true">
                   <PlaneIcon />
                 </span>
+
                 <span className="trip-history__details">
                   <strong>{trip.tripName}</strong>
                   <span>{trip.setup.departureDate}</span>
@@ -85,10 +111,6 @@ export function HomePage() {
           </ul>
         </section>
       )}
-
-      <section className="home-reminders" aria-label="Reminder settings">
-        <PushNotificationSetup />
-      </section>
 
       <footer className="app-footer">
         <span>NaPack</span>
