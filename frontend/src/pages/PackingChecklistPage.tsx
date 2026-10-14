@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
 import { PackingCategoryCard } from '../features/packing/PackingCategoryCard'
 import type { PackingCategory } from '../features/packing/types'
+
+interface UndoToggleAction {
+  categoryId: string
+  itemId: string
+  itemName: string
+  wasPacked: boolean
+}
 
 function createId(): string {
   return crypto.randomUUID()
@@ -32,6 +39,20 @@ export function PackingChecklistPage() {
 
   const [newCategoryName, setNewCategoryName] = useState('')
   const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [undoAction, setUndoAction] = useState<UndoToggleAction | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+
+  useEffect(() => {
+    if (!undoAction) return
+
+    const timeoutId = window.setTimeout(() => {
+      setUndoAction(null)
+    }, 5000)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [undoAction])
 
   if (isLoading) {
     return (
@@ -55,6 +76,13 @@ export function PackingChecklistPage() {
   }
 
   const { setup, tripName, categories } = activeTrip
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
+
+  const matchingCategories = categories.filter((category) =>
+    category.items.some((item) =>
+      item.name.toLocaleLowerCase().includes(normalizedQuery),
+    ),
+  )
 
   function updateCategory(
     categoryId: string,
@@ -149,14 +177,43 @@ export function PackingChecklistPage() {
   }
 
   function handleToggleItem(categoryId: string, itemId: string) {
-    updateCategory(categoryId, (category) => ({
+    const category = categories.find((entry) => entry.id === categoryId)
+    const item = category?.items.find((entry) => entry.id === itemId)
+
+    if (!item) return
+
+    setUndoAction({
+      categoryId,
+      itemId,
+      itemName: item.name,
+      wasPacked: item.isPacked,
+    })
+
+    updateCategory(categoryId, (currentCategory) => ({
+      ...currentCategory,
+      items: currentCategory.items.map((currentItem) =>
+        currentItem.id === itemId
+          ? { ...currentItem, isPacked: !currentItem.isPacked }
+          : currentItem,
+      ),
+    }))
+  }
+
+  function handleUndoToggle() {
+    if (!undoAction) return
+
+    const actionToUndo = undoAction
+
+    updateCategory(actionToUndo.categoryId, (category) => ({
       ...category,
       items: category.items.map((item) =>
-        item.id === itemId
-          ? { ...item, isPacked: !item.isPacked }
+        item.id === actionToUndo.itemId
+          ? { ...item, isPacked: actionToUndo.wasPacked }
           : item,
       ),
     }))
+
+    setUndoAction(null)
   }
 
   function handlePackAllItems(categoryId: string) {
@@ -173,11 +230,21 @@ export function PackingChecklistPage() {
       ...category,
       items: category.items.filter((item) => item.id !== itemId),
     }))
+
+    setUndoAction((current) =>
+      current?.categoryId === categoryId && current.itemId === itemId
+        ? null
+        : current,
+    )
   }
 
   function handleDeleteCategory(categoryId: string) {
     setCategories((current) =>
       current.filter((category) => category.id !== categoryId),
+    )
+
+    setUndoAction((current) =>
+      current?.categoryId === categoryId ? null : current,
     )
   }
 
@@ -293,20 +360,80 @@ export function PackingChecklistPage() {
         </div>
       </section>
 
+      {undoAction && (
+        <div className="undo-notice" role="status" aria-live="polite">
+          <span>
+            {undoAction.wasPacked
+              ? `"${undoAction.itemName}" marked as unpacked.`
+              : `"${undoAction.itemName}" marked as packed.`}
+          </span>
+
+          <button type="button" onClick={handleUndoToggle}>
+            Undo
+          </button>
+        </div>
+      )}
+
+      <section
+        className="checklist-search"
+        aria-label="Search packing checklist"
+      >
+        <label htmlFor="packing-item-search">Search your items</label>
+
+        <input
+          id="packing-item-search"
+          type="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Try passport, charger, medicine..."
+          autoComplete="off"
+        />
+
+        {normalizedQuery && (
+          <div className="checklist-search__results" role="status">
+            {matchingCategories.reduce(
+              (count, category) =>
+                count +
+                category.items.filter((item) =>
+                  item.name.toLocaleLowerCase().includes(normalizedQuery),
+                ).length,
+              0,
+            )}{' '}
+            matching item(s) in {matchingCategories.length}{' '}
+            {matchingCategories.length === 1 ? 'category' : 'categories'}.
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+      </section>
+
       <section aria-label="Packing categories">
-        {categories.map((category) => (
-          <PackingCategoryCard
-            key={category.id}
-            category={category}
-            onAddItem={handleAddItem}
-            onToggleItem={handleToggleItem}
-            onPackAllItems={handlePackAllItems}
-            onEditItem={handleEditItem}
-            onDeleteItem={handleDeleteItem}
-            onRenameCategory={handleRenameCategory}
-            onDeleteCategory={handleDeleteCategory}
-          />
-        ))}
+        {normalizedQuery && matchingCategories.length === 0 ? (
+          <p className="checklist-search__empty">
+            No items match “{searchQuery.trim()}”. Try another search term.
+          </p>
+        ) : (
+          (normalizedQuery ? matchingCategories : categories).map(
+            (category) => (
+              <PackingCategoryCard
+                key={category.id}
+                category={category}
+                searchQuery={searchQuery}
+                onAddItem={handleAddItem}
+                onToggleItem={handleToggleItem}
+                onPackAllItems={handlePackAllItems}
+                onEditItem={handleEditItem}
+                onDeleteItem={handleDeleteItem}
+                onRenameCategory={handleRenameCategory}
+                onDeleteCategory={handleDeleteCategory}
+              />
+            ),
+          )
+        )}
       </section>
 
       {showCategoryForm ? (

@@ -6,6 +6,7 @@ import type { PackingCategory, PackingItem } from './types'
 
 interface PackingCategoryCardProps {
   category: PackingCategory
+  searchQuery: string
   onAddItem: (
     categoryId: string,
     name: string,
@@ -122,6 +123,7 @@ function ItemForm({
 
 export function PackingCategoryCard({
   category,
+  searchQuery,
   onAddItem,
   onToggleItem,
   onPackAllItems,
@@ -138,10 +140,15 @@ export function PackingCategoryCard({
   const [isExpanded, setIsExpanded] = useState(true)
 
   const progress = calculateCategoryProgress(category)
-  const remainingItems = category.items.filter((item) => !item.isPacked)
-  const hasRemainingItems = remainingItems.length > 0
+  const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
 
-  const visibleItems = category.items.filter((item) => {
+  const matchingItems = category.items.filter((item) =>
+    item.name.toLocaleLowerCase().includes(normalizedQuery),
+  )
+
+  const remainingItems = matchingItems.filter((item) => !item.isPacked)
+
+  const visibleItems = matchingItems.filter((item) => {
     if (itemFilter === 'unpacked') return !item.isPacked
     if (itemFilter === 'packed') return item.isPacked
     return true
@@ -260,7 +267,7 @@ export function PackingCategoryCard({
             aria-pressed={itemFilter === 'all'}
             onClick={() => setItemFilter('all')}
           >
-            All ({category.items.length})
+            All ({matchingItems.length})
           </button>
 
           <button
@@ -268,37 +275,43 @@ export function PackingCategoryCard({
             aria-pressed={itemFilter === 'unpacked'}
             onClick={() => setItemFilter('unpacked')}
           >
-            To pack (
-            {remainingItems.length})
+            To pack ({remainingItems.length})
           </button>
 
           <button
             type="button"
             aria-pressed={itemFilter === 'packed'}
-            onClick={() => setItemFilter('packed')}
+            onClick={() =>
+              setItemFilter('packed')
+            }
           >
-            Packed ({progress.completed})
+            Packed ({matchingItems.filter((item) => item.isPacked).length})
           </button>
         </div>
 
-        {hasRemainingItems && (
+        {!normalizedQuery && remainingItems.length > 0 && (
           <button
             type="button"
             onClick={() => onPackAllItems(category.id)}
           >
-            Pack all remaining items ({remainingItems.length})
+            Pack all remaining items (
+            {category.items.filter((item) => !item.isPacked).length})
           </button>
         )}
 
-        {category.items.length === 0 ? (
-          <p>No items yet. Add something you need to pack.</p>
-        ) : visibleItems.length === 0 ? (
+        {visibleItems.length === 0 ? (
           <p>
-            {itemFilter === 'packed'
-              ? 'No items packed yet.'
-              : itemFilter === 'unpacked'
-                ? 'All items are packed. Nice work!'
-                : 'No items to show.'}
+            {normalizedQuery
+              ? itemFilter === 'packed'
+                ? 'No matching packed items.'
+                : itemFilter === 'unpacked'
+                  ? 'No matching items left to pack.'
+                  : 'No matching items.'
+              : category.items.length === 0
+                ? 'No items yet. Add something you need to pack.'
+                : itemFilter === 'packed'
+                  ? 'No items packed yet.'
+                  : 'All items are packed. Nice work!'}
           </p>
         ) : (
           <ul className="packing-item-list">
