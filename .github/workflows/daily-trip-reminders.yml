@@ -3,7 +3,7 @@ name: NaPack Daily Trip Reminders
 on:
   schedule:
     # 08:00 in the Philippines (00:00 UTC).
-    - cron: '0 0 * * *'
+    - cron: '0 4 * * *'
 
   workflow_dispatch:
     inputs:
