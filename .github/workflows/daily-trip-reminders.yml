@@ -230,13 +230,15 @@ jobs:
 
             const tripName = trip.tripName || 'Your trip'
 
+            
             const title = isDepartureDay
-              ? 'Your trip is today!'
-              : 'Trip reminder'
-
+              ? 'Your trip is today! 🎉'
+              : 'Getting ready to go? 🧳'
+            
             const body = isDepartureDay
-              ? `${tripName} departs today. Check your NaPack checklist before you go.`
-              : `${tripName} is coming up on ${trip.departureDate}. Check your NaPack checklist before you go.`
+              ? 'One last check: review your packing list and get ready to go!'
+              : `Check your packing checklist for ${tripName} (${trip.departureDate}) so nothing gets left behind!`
+
 
             if (dryRun) {
               console.log(
