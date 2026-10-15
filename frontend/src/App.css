@@ -960,7 +960,7 @@ form.packing-form input:not([type="checkbox"]) { width: 100%; min-width: 0; marg
   }
 }
 
-/* NaPack responsive regression guard ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â keep content columns from collapsing. */
+/* NaPack responsive regression guard ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â keep content columns from collapsing. */
 .category-card,
 .category-card__header,
 .category-card__heading,
@@ -3094,6 +3094,320 @@ form.packing-form--category-add,
     height: 38px;
     min-height: 38px;
     padding: 9px;
+  }
+}
+
+/* Keep the notification control aligned with each page's brand row, not over content. */
+.brand-header,
+.setup-page__header,
+.page-brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.brand-header__notifications {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.page-brand-row .page-brand-mark {
+  min-width: 0;
+  margin-bottom: 10px;
+}
+
+/* Use a stronger contrast for the enabled bell icon. */
+.notification-control__button.is-enabled {
+  color: #075eb8;
+  background: #e4f1ff;
+  border-color: #a9d2ff;
+}
+
+.notification-control__button.is-enabled svg {
+  stroke-width: 2.2;
+}
+/* Responsive Setup header: keep back, brand, and notifications on one shared row. */
+.setup-page__header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  column-gap: clamp(8px, 2vw, 16px);
+  width: 100%;
+  margin: 0 0 clamp(28px, 4vw, 40px);
+}
+
+.setup-page__header .setup-page__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  justify-self: start;
+}
+
+.setup-page__header .page-brand-mark {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  justify-self: start;
+  gap: 0;
+}
+
+.setup-page__header .page-brand-mark img {
+  display: block;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.setup-page__header .page-brand-mark__name {
+  margin-left: clamp(8px, 1.5vw, 12px);
+  font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.setup-page__header .brand-header__notifications {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 44px;
+  margin: 0;
+  justify-self: end;
+}
+
+.setup-page__header .notification-control__button {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 480px) {
+  .setup-page__header {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    column-gap: 8px;
+    margin-bottom: 30px;
+  }
+
+  .setup-page__header .setup-page__back,
+  .setup-page__header .brand-header__notifications,
+  .setup-page__header .notification-control__button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .setup-page__header .notification-control__button {
+    flex-basis: 40px;
+  }
+
+  .setup-page__header .page-brand-mark img {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .setup-page__header .page-brand-mark__name {
+    font-size: 1.05rem;
+    margin-left: 8px;
+  }
+}
+
+/* Setup page header alignment: align the back icon with the content's left edge. */
+.setup-page__header {
+  grid-template-columns: 24px minmax(0, 1fr) 44px;
+  align-items: center;
+  column-gap: 8px;
+}
+
+.setup-page__header .setup-page__back {
+  justify-self: start;
+  width: 24px;
+  min-width: 24px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+}
+
+.setup-page__header .setup-page__back svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.setup-page__header .page-brand-mark {
+  align-self: center;
+  gap: 0;
+}
+
+.setup-page__header .page-brand-mark img {
+  display: block;
+  width: 44px;
+  height: 44px;
+  flex-basis: 44px;
+}
+
+.setup-page__header .brand-header__notifications {
+  justify-self: end;
+  align-self: center;
+}
+
+@media (max-width: 480px) {
+  .setup-page__header {
+    grid-template-columns: 24px minmax(0, 1fr) 40px;
+    column-gap: 8px;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .setup-page__header .setup-page__back {
+    width: 24px;
+    min-width: 24px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .setup-page__header .setup-page__back svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .setup-page__header .page-brand-mark img {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .setup-page__header .page-brand-mark__name {
+    margin-left: 8px;
+    font-size: 1.05rem;
+    line-height: 1.1;
+  }
+}
+
+/* Packing checklist header: align the branding and bell, then give the trip panel clear separation. */
+.checklist-page .page-brand-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 16px;
+  width: 100%;
+  margin: 0 0 clamp(32px, 5vw, 44px);
+}
+
+.checklist-page .page-brand-row .page-brand-mark {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 0;
+  margin: 0;
+  align-self: center;
+}
+
+.checklist-page .page-brand-row .page-brand-mark img {
+  display: block;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.checklist-page .page-brand-row .page-brand-mark__name {
+  margin-left: 10px;
+  font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.checklist-page .page-brand-row .brand-header__notifications {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 44px;
+  margin: 0;
+  align-self: center;
+}
+
+.checklist-page .page-brand-row .notification-control__button {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  margin: 0;
+}
+
+@media (max-width: 480px) {
+  .checklist-page .page-brand-row {
+    column-gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .checklist-page .page-brand-row .page-brand-mark img {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .checklist-page .page-brand-row .page-brand-mark__name {
+    margin-left: 8px;
+    font-size: 1.05rem;
+  }
+
+  .checklist-page .page-brand-row .brand-header__notifications,
+  .checklist-page .page-brand-row .notification-control__button {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .checklist-page .page-brand-row .notification-control__button {
+    flex-basis: 40px;
+  }
+}
+
+
+/* Per-category item scrolling: show 5 rows on mobile and 10 on larger screens. */
+.packing-item-list--scrollable {
+  max-height: 580px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  padding-right: 6px;
+}
+
+/* Compact rows by about 0.5rem only when the category list needs scrolling. */
+.packing-item-list--scrollable .packing-item {
+  padding-block: 4px;
+}
+
+.packing-item-list--scrollable .packing-item label {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .packing-item-list--scrollable {
+    max-height: 250px;
+    padding-right: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .packing-item-list--scrollable::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }
 
