@@ -10,10 +10,23 @@ on:
 
   workflow_dispatch:
     inputs:
+      reminder_mode:
+        description: 'Which reminder schedule should be tested?'
+        required: true
+        type: choice
+        options:
+          - noon
+          - midnight
+        default: noon
       target_date:
-        description: 'Optional reminder evaluation date (YYYY-MM-DD).'
+        description: 'Optional Manila evaluation date (YYYY-MM-DD).'
         required: false
         type: string
+      dry_run:
+        description: 'Preview only; do not send notifications or update Firestore.'
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -39,6 +52,8 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           TARGET_DATE_OVERRIDE: ${{ inputs.target_date }}
+          REMINDER_MODE_INPUT: ${{ inputs.reminder_mode }}
+          DRY_RUN_INPUT: ${{ inputs.dry_run }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           GITHUB_EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: |
@@ -82,10 +97,32 @@ jobs:
           }
 
           const runDate = override || getManilaDate()
+          const isManualRun =
+            process.env.GITHUB_EVENT_NAME === 'workflow_dispatch'
 
-          const isMidnightRun =
-            process.env.GITHUB_EVENT_NAME === 'schedule' &&
+          let reminderMode
+
+          if (isManualRun) {
+            reminderMode = process.env.REMINDER_MODE_INPUT
+          } else if (
             process.env.GITHUB_EVENT_SCHEDULE === '0 16 * * *'
+          ) {
+            reminderMode = 'midnight'
+          } else if (
+            process.env.GITHUB_EVENT_SCHEDULE === '0 4 * * *'
+          ) {
+            reminderMode = 'noon'
+          } else {
+            throw new Error('Could not determine the scheduled reminder mode.')
+          }
+
+          if (!['noon', 'midnight'].includes(reminderMode)) {
+            throw new Error('Reminder mode must be noon or midnight.')
+          }
+
+          // Manual runs default to preview-only. Scheduled runs send normally.
+          const dryRun = isManualRun &&
+            process.env.DRY_RUN_INPUT === 'true'
 
           const rawCredentials =
             process.env.FIREBASE_SERVICE_ACCOUNT_JSON
@@ -106,10 +143,9 @@ jobs:
           const db = getFirestore()
           const messaging = getMessaging()
 
-          console.log(`Philippines reminder date: ${runDate}`)
-          console.log(
-            `Reminder run: ${isMidnightRun ? 'departure-day midnight' : 'noon'}`,
-          )
+          console.log(`Philippines evaluation date: ${runDate}`)
+          console.log(`Reminder mode: ${reminderMode}`)
+          console.log(`Dry run: ${dryRun}`)
 
           const tripsSnapshot = await db
             .collectionGroup('tripReminders')
@@ -117,6 +153,7 @@ jobs:
 
           let matched = 0
           let sent = 0
+          let previewed = 0
           let skipped = 0
           let failed = 0
 
@@ -126,19 +163,22 @@ jobs:
             if (
               trip.status !== 'active' ||
               typeof trip.departureDate !== 'string' ||
-              !isValidDateString(trip.departureDate) ||
-              trip.departureDate < runDate
+              !isValidDateString(trip.departureDate)
             ) {
               continue
             }
 
             const isDepartureDay = trip.departureDate === runDate
 
-            // Midnight run: only trips departing today.
-            // Noon run: only trips departing after today.
+            // Midnight: trips departing today.
+            // Noon: trips departing after today.
+            if (reminderMode === 'midnight' && !isDepartureDay) {
+              continue
+            }
+
             if (
-              (isMidnightRun && !isDepartureDay) ||
-              (!isMidnightRun && isDepartureDay)
+              reminderMode === 'noon' &&
+              trip.departureDate <= runDate
             ) {
               continue
             }
@@ -148,7 +188,7 @@ jobs:
             // Avoid duplicate reminders for the same trip and Manila date.
             if (trip.dailyReminderSentFor === runDate) {
               console.log(
-                `Already reminded today for trip ${trip.tripId}.`,
+                `Already reminded for this date; skipping trip ${trip.tripId}.`,
               )
               skipped += 1
               continue
@@ -198,6 +238,14 @@ jobs:
               ? `${tripName} departs today. Check your NaPack checklist before you go.`
               : `${tripName} is coming up on ${trip.departureDate}. Check your NaPack checklist before you go.`
 
+            if (dryRun) {
+              console.log(
+                `[DRY RUN] Would send "${title}" for trip ${trip.tripId}, departure ${trip.departureDate}.`,
+              )
+              previewed += 1
+              continue
+            }
+
             try {
               await messaging.send({
                 token: subscription.token,
@@ -208,7 +256,7 @@ jobs:
                 },
               })
 
-              // Record the Manila date after FCM accepts the message.
+              // Record the date only after FCM accepts the message.
               await tripDoc.ref.update({
                 dailyReminderSentFor: runDate,
                 dailyReminderSentAt: FieldValue.serverTimestamp(),
@@ -230,6 +278,7 @@ jobs:
           }
 
           console.log(`Matching trips: ${matched}`)
+          console.log(`Previewed reminders: ${previewed}`)
           console.log(`Reminders sent: ${sent}`)
           console.log(`Skipped: ${skipped}`)
           console.log(`Failed: ${failed}`)
