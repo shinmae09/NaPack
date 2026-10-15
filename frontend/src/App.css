@@ -3376,3 +3376,37 @@ form.packing-form--category-add,
     flex-basis: 40px;
   }
 }
+
+
+/* Per-category item scrolling: show 5 rows on mobile and 10 on larger screens. */
+.packing-item-list--scrollable {
+  max-height: 580px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  padding-right: 6px;
+}
+
+/* Compact rows by about 0.5rem only when the category list needs scrolling. */
+.packing-item-list--scrollable .packing-item {
+  padding-block: 4px;
+}
+
+.packing-item-list--scrollable .packing-item label {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .packing-item-list--scrollable {
+    max-height: 250px;
+    padding-right: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .packing-item-list--scrollable::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+}

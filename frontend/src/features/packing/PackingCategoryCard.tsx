@@ -275,6 +275,18 @@ export function PackingCategoryCard({
     getInitialSortOrder(category.id),
   )
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    window.matchMedia('(max-width: 600px)').matches,
+  )
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 600px)')
+    const updateViewport = () => setIsMobileViewport(mediaQuery.matches)
+
+    updateViewport()
+    mediaQuery.addEventListener('change', updateViewport)
+    return () => mediaQuery.removeEventListener('change', updateViewport)
+  }, [])
 
   const progress = calculateCategoryProgress(category)
   const normalizedQuery = searchQuery.trim().toLocaleLowerCase()
@@ -315,6 +327,8 @@ export function PackingCategoryCard({
     if (itemFilter === 'packed') return item.isPacked
     return true
   })
+  const visibleItemLimit = isMobileViewport ? 5 : 10
+  const isItemListScrollable = visibleItems.length > visibleItemLimit
 
   function handleRename(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -538,7 +552,7 @@ export function PackingCategoryCard({
                   : 'All items are packed. Nice work!'}
           </p>
         ) : (
-          <ul className="packing-item-list">
+          <ul className={`packing-item-list${isItemListScrollable ? ' packing-item-list--scrollable' : ''}`}>
             {visibleItems.map((item) => (
               <li key={item.id} className="packing-item-wrap">
                 <div className="packing-item">
