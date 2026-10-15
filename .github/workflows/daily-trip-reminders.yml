@@ -1,14 +1,17 @@
+
 name: NaPack Daily Trip Reminders
 
 on:
   schedule:
-    # 08:00 in the Philippines (00:00 UTC).
+    # Noon Philippines time (04:00 UTC).
     - cron: '0 4 * * *'
+    # Midnight Philippines time (16:00 UTC, previous UTC date).
+    - cron: '0 16 * * *'
 
   workflow_dispatch:
     inputs:
       target_date:
-        description: 'Optional test date (YYYY-MM-DD). Remind trips departing the following day.'
+        description: 'Optional reminder evaluation date (YYYY-MM-DD).'
         required: false
         type: string
 
@@ -36,19 +39,16 @@ jobs:
         env:
           FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           TARGET_DATE_OVERRIDE: ${{ inputs.target_date }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_SCHEDULE: ${{ github.event.schedule }}
         run: |
           node --input-type=module <<'NODE'
-          import {
-            initializeApp,
-            cert,
-          } from 'firebase-admin/app'
+          import { initializeApp, cert } from 'firebase-admin/app'
           import {
             FieldValue,
             getFirestore,
           } from 'firebase-admin/firestore'
-          import {
-            getMessaging,
-          } from 'firebase-admin/messaging'
+          import { getMessaging } from 'firebase-admin/messaging'
 
           function getManilaDate(date = new Date()) {
             const parts = new Intl.DateTimeFormat('en-CA', {
@@ -65,25 +65,35 @@ jobs:
             return `${values.year}-${values.month}-${values.day}`
           }
 
-          function addDays(dateString, days) {
-            const date = new Date(`${dateString}T12:00:00Z`)
-            date.setUTCDate(date.getUTCDate() + days)
-            return date.toISOString().slice(0, 10)
+          function isValidDateString(value) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+
+            const date = new Date(`${value}T00:00:00Z`)
+            return !Number.isNaN(date.getTime()) &&
+              date.toISOString().slice(0, 10) === value
           }
 
           const override = process.env.TARGET_DATE_OVERRIDE?.trim()
 
-          if (override && !/^\d{4}-\d{2}-\d{2}$/.test(override)) {
-            throw new Error('TARGET_DATE_OVERRIDE must use YYYY-MM-DD format.')
+          if (override && !isValidDateString(override)) {
+            throw new Error(
+              'TARGET_DATE_OVERRIDE must be a valid YYYY-MM-DD date.',
+            )
           }
 
-          const today = getManilaDate()
-          const targetDepartureDate = addDays(override || today, 1)
+          const runDate = override || getManilaDate()
 
-          const rawCredentials = process.env.FIREBASE_SERVICE_ACCOUNT_JSON
+          const isMidnightRun =
+            process.env.GITHUB_EVENT_NAME === 'schedule' &&
+            process.env.GITHUB_EVENT_SCHEDULE === '0 16 * * *'
+
+          const rawCredentials =
+            process.env.FIREBASE_SERVICE_ACCOUNT_JSON
 
           if (!rawCredentials) {
-            throw new Error('Missing FIREBASE_SERVICE_ACCOUNT_JSON secret.')
+            throw new Error(
+              'Missing FIREBASE_SERVICE_ACCOUNT_JSON secret.',
+            )
           }
 
           const credentials = JSON.parse(rawCredentials)
@@ -96,8 +106,10 @@ jobs:
           const db = getFirestore()
           const messaging = getMessaging()
 
-          console.log(`Philippines date: ${today}`)
-          console.log(`Checking trips departing: ${targetDepartureDate}`)
+          console.log(`Philippines reminder date: ${runDate}`)
+          console.log(
+            `Reminder run: ${isMidnightRun ? 'departure-day midnight' : 'noon'}`,
+          )
 
           const tripsSnapshot = await db
             .collectionGroup('tripReminders')
@@ -113,15 +125,31 @@ jobs:
 
             if (
               trip.status !== 'active' ||
-              trip.departureDate !== targetDepartureDate
+              typeof trip.departureDate !== 'string' ||
+              !isValidDateString(trip.departureDate) ||
+              trip.departureDate < runDate
+            ) {
+              continue
+            }
+
+            const isDepartureDay = trip.departureDate === runDate
+
+            // Midnight run: only trips departing today.
+            // Noon run: only trips departing after today.
+            if (
+              (isMidnightRun && !isDepartureDay) ||
+              (!isMidnightRun && isDepartureDay)
             ) {
               continue
             }
 
             matched += 1
 
-            if (trip.dayBeforeReminderSentFor === trip.departureDate) {
-              console.log(`Already reminded for trip ${trip.tripId}.`)
+            // Avoid duplicate reminders for the same trip and Manila date.
+            if (trip.dailyReminderSentFor === runDate) {
+              console.log(
+                `Already reminded today for trip ${trip.tripId}.`,
+              )
               skipped += 1
               continue
             }
@@ -129,7 +157,9 @@ jobs:
             const userDoc = tripDoc.ref.parent.parent
 
             if (!userDoc) {
-              console.error(`Could not identify owner of trip ${trip.tripId}.`)
+              console.error(
+                `Could not identify owner of trip ${trip.tripId}.`,
+              )
               failed += 1
               continue
             }
@@ -158,28 +188,42 @@ jobs:
               continue
             }
 
+            const tripName = trip.tripName || 'Your trip'
+
+            const title = isDepartureDay
+              ? 'Your trip is today!'
+              : 'Trip reminder'
+
+            const body = isDepartureDay
+              ? `${tripName} departs today. Check your NaPack checklist before you go.`
+              : `${tripName} is coming up on ${trip.departureDate}. Check your NaPack checklist before you go.`
+
             try {
               await messaging.send({
                 token: subscription.token,
                 data: {
-                  title: 'Your trip is tomorrow!',
-                  body: `${trip.tripName || 'Your trip'} departs tomorrow. Check your NaPack checklist before you go.`,
+                  title,
+                  body,
                   url: '/',
                 },
               })
 
-              // Record success only after FCM accepts the message.
+              // Record the Manila date after FCM accepts the message.
               await tripDoc.ref.update({
-                dayBeforeReminderSentFor: trip.departureDate,
-                dayBeforeReminderSentAt: FieldValue.serverTimestamp(),
+                dailyReminderSentFor: runDate,
+                dailyReminderSentAt: FieldValue.serverTimestamp(),
               })
 
-              console.log(`Reminder accepted for trip ${trip.tripId}.`)
+              console.log(
+                `Reminder accepted for trip ${trip.tripId}.`,
+              )
               sent += 1
             } catch (error) {
               console.error(
                 `Reminder failed for trip ${trip.tripId}:`,
-                error instanceof Error ? error.message : 'Unknown error',
+                error instanceof Error
+                  ? error.message
+                  : 'Unknown error',
               )
               failed += 1
             }
