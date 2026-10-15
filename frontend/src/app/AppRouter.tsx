@@ -18,8 +18,9 @@ export function AppRouter() {
   }
 
   return (
-    <div key={location.pathname} className="route-transition">
-      <Routes>
+    <>
+      <div key={location.pathname} className="route-transition">
+        <Routes>
         <Route
           path="/"
           element={
@@ -48,7 +49,8 @@ export function AppRouter() {
         />
 
         <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+        </Routes>
+      </div>
+    </>
   )
 }

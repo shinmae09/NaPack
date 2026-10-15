@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
 import { PackingCategoryCard } from '../features/packing/PackingCategoryCard'
+import { PushNotificationSetup } from '../components/PushNotificationSetup'
 import type { PackingCategory } from '../features/packing/types'
 
 interface ToggleUndoAction {
@@ -107,11 +109,33 @@ export function PackingChecklistPage() {
   const [isProgressCompact, setIsProgressCompact] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => setIsProgressCompact(window.scrollY > 280)
+    // Use separate enter/exit thresholds so the compact card's own layout
+    // changes cannot repeatedly toggle its state near a single threshold.
+    const ENTER_COMPACT_AT = 280
+    const EXIT_COMPACT_AT = 220
+
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+
+      setIsProgressCompact((wasCompact) => {
+        if (!wasCompact && scrollY > ENTER_COMPACT_AT) {
+          return true
+        }
+
+        if (wasCompact && scrollY < EXIT_COMPACT_AT) {
+          return false
+        }
+
+        return wasCompact
+      })
+    }
 
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
   }, [])
 
   useEffect(() => {
@@ -414,7 +438,10 @@ export function PackingChecklistPage() {
 
   return (
     <main className="app-page checklist-page">
-      <div className="page-brand-mark"><img src="/napack-icon-192x192.png" alt="" /><span className="page-brand-mark__name">NaPack</span></div>
+      <div className="page-brand-row">
+        <div className="page-brand-mark"><img src="/napack-icon-192x192.png" alt="" /><span className="page-brand-mark__name">NaPack</span></div>
+        <div className="brand-header__notifications"><PushNotificationSetup /></div>
+      </div>
       <header className="checklist-trip-header">
         <div className="checklist-trip-header__title-row">
           <span className="checklist-trip-header__icon" aria-hidden="true">
@@ -511,7 +538,7 @@ export function PackingChecklistPage() {
         </div>
       </section>
 
-      {undoAction && (
+      {undoAction && createPortal(
         <div className="undo-notice" role="status" aria-live="polite">
           <span>
             {undoAction.type === 'toggle'
@@ -531,7 +558,8 @@ export function PackingChecklistPage() {
             <UndoIcon />
             <span>Undo</span>
           </button>
-        </div>
+        </div>,
+        document.body,
       )}
 
       <section

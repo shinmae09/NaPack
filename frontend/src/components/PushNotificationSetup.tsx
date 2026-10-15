@@ -29,7 +29,14 @@ function BellIcon({ enabled }: { enabled: boolean }) {
   )
 }
 
-export function PushNotificationSetup() {
+interface PushNotificationSetupProps {
+  /** Show the onboarding hint only where explicitly requested (Home page). */
+  showTooltip?: boolean
+}
+
+export function PushNotificationSetup({
+  showTooltip = false,
+}: PushNotificationSetupProps) {
   const [isEnabling, setIsEnabling] = useState(false)
   const [isEnabled, setIsEnabled] = useState(false)
   const [isOptedOut, setIsOptedOut] = useState(() => {
@@ -88,33 +95,55 @@ export function PushNotificationSetup() {
 
   useEffect(() => {
     let cancelled = false
+    let showTimer: number | undefined
     let hideTimer: number | undefined
-    const isMobile = window.matchMedia('(max-width: 480px)').matches
 
-    const showTimer = isMobile
-      ? window.setTimeout(() => {
-          if (!cancelled && !isEnabled && !isOptedOut) {
+    if (showTooltip && !isEnabled && !isOptedOut) {
+      const isMobile = window.matchMedia('(max-width: 480px)').matches
+
+      if (isMobile) {
+        showTimer = window.setTimeout(() => {
+          if (!cancelled) {
             setShowHint(true)
+
             hideTimer = window.setTimeout(() => {
-              if (!cancelled) setShowHint(false)
+              if (!cancelled) {
+                setShowHint(false)
+              }
             }, 5000)
           }
         }, 5000)
-      : undefined
+      }
+    }
 
     const synchronize = () => {
-      if (!cancelled) void synchronizeSubscription()
+      if (!cancelled) {
+        void synchronizeSubscription()
+      }
     }
+
     void Promise.resolve().then(synchronize)
     window.addEventListener('focus', synchronize)
 
     return () => {
       cancelled = true
-      if (showTimer !== undefined) window.clearTimeout(showTimer)
-      if (hideTimer !== undefined) window.clearTimeout(hideTimer)
+
+      if (showTimer !== undefined) {
+        window.clearTimeout(showTimer)
+      }
+
+      if (hideTimer !== undefined) {
+        window.clearTimeout(hideTimer)
+      }
+
       window.removeEventListener('focus', synchronize)
     }
-  }, [isEnabled, isOptedOut, synchronizeSubscription])
+  }, [
+    isEnabled,
+    isOptedOut,
+    showTooltip,
+    synchronizeSubscription,
+  ])
 
   useEffect(() => {
     try {
@@ -129,6 +158,7 @@ export function PushNotificationSetup() {
 
   async function handleEnableNotifications() {
     if (isEnabled || isEnabling) return
+
     setIsEnabling(true)
     setShowHint(false)
     setStatus('')
@@ -158,17 +188,22 @@ export function PushNotificationSetup() {
     if (isEnabled) {
       setIsEnabling(true)
       setStatus('')
+
       try {
         await setPushSubscriptionEnabled(false)
         setIsEnabled(false)
         setIsOptedOut(true)
+        setShowHint(false)
         setStatus('Travel reminders are turned off.')
       } catch (error) {
         console.error('Could not disable travel reminders:', error)
-        setStatus('Could not turn off travel reminders. Check your connection and retry.')
+        setStatus(
+          'Could not turn off travel reminders. Check your connection and retry.',
+        )
       } finally {
         setIsEnabling(false)
       }
+
       return
     }
 
@@ -185,18 +220,36 @@ export function PushNotificationSetup() {
         role="switch"
         aria-checked={isEnabled}
         aria-label="Travel reminders"
-        title={isEnabled ? 'Turn off travel reminders' : 'Turn on travel reminders'}
+        title={
+          isEnabled
+            ? 'Turn off travel reminders'
+            : 'Turn on travel reminders'
+        }
       >
         <BellIcon enabled={isEnabled} />
-        {isEnabled && <span className="notification-control__dot" aria-hidden="true" />}
+        {isEnabled && (
+          <span
+            className="notification-control__dot"
+            aria-hidden="true"
+          />
+        )}
       </button>
 
-      {showHint && !isEnabled && (
+      {showTooltip && showHint && !isEnabled && !isOptedOut && (
         <>
-          <div className="notification-control__backdrop" aria-hidden="true" />
-          <div className="notification-control__tooltip" role="status">
-          <strong>Travel reminders</strong>
-          <span>Enable notifications so NaPack can remind you about your upcoming trip.</span>
+          <div
+            className="notification-control__backdrop"
+            aria-hidden="true"
+          />
+          <div
+            className="notification-control__tooltip"
+            role="status"
+          >
+            <strong>Travel reminders</strong>
+            <span>
+              Enable notifications so NaPack can remind you about your
+              upcoming trip.
+            </span>
             <span className="notification-control__tooltip-note">
               Tap the bell to turn reminders on.
             </span>
