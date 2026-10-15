@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
+import { PushNotificationSetup } from '../components/PushNotificationSetup'
 
 function BackIcon() {
   return (
@@ -110,6 +111,7 @@ export function SetupPage() {
           <img src="/napack-icon-192x192.png" alt="" />
           <span className="page-brand-mark__name">NaPack</span>
         </div>
+        <div className="brand-header__notifications"><PushNotificationSetup /></div>
       </div>
 
       <header className="setup-intro">

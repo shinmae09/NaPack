@@ -1,4 +1,3 @@
-
 import { useNavigate } from 'react-router-dom'
 import { useNaPack } from '../app/useNaPack'
 import { PushNotificationSetup } from '../components/PushNotificationSetup'
@@ -40,10 +39,7 @@ export function HomePage() {
         />
 
         <span className="brand-header__name">NaPack</span>
-
-        <div className="brand-header__notifications">
-          <PushNotificationSetup />
-        </div>
+        <div className="brand-header__notifications"><PushNotificationSetup showTooltip /></div>
       </header>
 
       <section className="home-hero" aria-labelledby="home-title">
